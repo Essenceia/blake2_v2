@@ -204,7 +204,7 @@ module blake2 #(
 	generate
 		for(i_v_init=0;i_v_init<8;i_v_init=i_v_init+1) begin : loop_v_init
 			 assign f_h[i_v_init]      = first_block_q ? h_init[i_v_init]: h_q[i_v_init]; // v[0..7] := h[0..7]
-			 assign v_init[i_v_init]   = f_h; // v[0..7] := h[0..7]
+			 assign v_init[i_v_init]   = f_h[i_v_init]; // v[0..7] := h[0..7]
 			 assign v_init[i_v_init+8] = IV[i_v_init];     // v[8..15] := IV[0..7]
 		end
 	 endgenerate
