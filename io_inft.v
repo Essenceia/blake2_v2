@@ -161,4 +161,5 @@ module io_intf(
 	);
 
 	assign hash_finished_o = hash_finished_i;
+	assign hash_o = hash_i;
 endmodule
