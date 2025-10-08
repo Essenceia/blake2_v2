@@ -69,7 +69,6 @@ module block_data(
 	reg       start_q;
 	wire      last_v;
 	reg       last_q;
-	wire      conf_v;
 
 
 	assign start_v = valid_i & (cmd_i == CMD_START);	

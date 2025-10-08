@@ -43,9 +43,6 @@ module blake2 #(
 	 
 	reg  [2:0] g_idx_q; // G function idx, sub-round
 	reg  [3:0] round_q;
-	wire [3:0] round_next;
-	wire       round_en;
-	wire       final_round;
 
 	wire [BB-1:0]  t;	
 	reg  [IB_CNT_W-1:0]  block_idx_q;
@@ -129,6 +126,7 @@ module blake2 #(
 				S_F: fsm_q <= f_finished ? S_F_END : S_F;
 				S_F_END: fsm_q <= last_block_q ? S_RES : S_WAIT_DATA;
 				S_RES: fsm_q <= res_cnt_q == 'd31 ? S_IDLE: S_RES;
+				default : fsm_q <= S_IDLE; 
 			endcase
 		end
 	end
@@ -150,7 +148,7 @@ module blake2 #(
 		endcase
 	end
 
-	wire unused_f_cnt_q;
+	reg unused_f_cnt_q;
 	always @(posedge clk) begin
 		case (fsm_q)
 			S_F: {unused_f_cnt_q, round_q, g_idx_q} <= {round_q, g_idx_q} + 'b1;
@@ -415,7 +413,10 @@ module blake2 #(
 			h_q <= h_shift_next_matrix;
 
 	// output streaming
+	reg [7:0] h_o_q;
 	always @(posedge clk)
-		h_o <= h_q[0][7:0];
-	
+		h_o_q <= h_q[0][7:0];
+	assign h_o = h_o_q;
+	assign finished_o = (fsm_q == S_RES);
+
 endmodule

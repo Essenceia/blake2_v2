@@ -49,7 +49,7 @@ module top(
 	
 	blake2s_hash256 m_blake2(
 		.clk(clk),
-		.nreset(nreset),
+		.nreset(rst_n),
 
 		.kk_i(kk),
 		.nn_i(nn),
