@@ -25,7 +25,7 @@ module byte_size_config(
 		if ((~nreset) | (valid_i & ~config_v_i)) begin
 			cfg_cnt_q <= '0;
 		end else begin
-			{ unusued_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + 'd1;
+			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + 'd1;
 		end
 	end
 
@@ -60,9 +60,10 @@ module block_data(
 	parameter CMD_DATA  = 2'd2;
 	parameter CMD_LAST  = 2'd3;
 
+	reg       data_v_q;
 	reg [7:0] data_q;
 	reg [5:0] cnt_q;
-	reg       unusued_cnt_q;
+	reg       unused_cnt_q;
 	wire      data_v;
 	wire      start_v;
 	reg       start_q;
