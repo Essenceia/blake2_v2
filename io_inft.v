@@ -116,9 +116,11 @@ module io_intf(
 	input wire [7:0] data_i,
 
 	output wire hash_finished_o,
+	output wire [7:0] hash_o,
 
 	// inner
 	input wire       hash_finished_i,
+	input wire [7:0] hash_i,
 
 	output wire [7:0]  kk_o,
 	output wire [7:0]  nn_o,
