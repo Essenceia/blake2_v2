@@ -21,14 +21,14 @@ module top(
 	wire [5:0] data_idx; 
 	wire block_first, block_last; 
 
-	assign uio_en = 8'b0000_1000;
+	assign uio_oe = 8'b0000_1000;
 
 	io_intf m_io_intf(
 		.clk(clk),
 		.nreset(rst_n),
 
 		.valid_i(uio_in[0]),
-		.cmd_i(uin_in[2:1]),
+		.cmd_i(uio_in[2:1]),
 		.data_i(ui_in),
 		.hash_finished_o(uio_out[3]),
 		.hash_o(uo_out),

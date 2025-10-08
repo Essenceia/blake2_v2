@@ -52,7 +52,7 @@ module blake2s_hash256(
 	input wire          block_last_i,               
 	
 	input        data_v_i,
-	input [3:0]  data_idx_i,	
+	input [5:0]  data_idx_i,	
 	input [7:0]  data_i,
 	
 	output       finished_o,

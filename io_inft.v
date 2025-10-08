@@ -33,7 +33,7 @@ module byte_size_config(
 		case(cfg_cnt_q) 
 			CFG_CNT_KK: kk_q <= data_i;
 			CFG_CNT_NN: nn_q <= data_i;
-			default: ll_q <= {ll_q[54:0] , data_i}; 
+			default: ll_q <= {ll_q[55:0] , data_i}; 
 		endcase
 	end
 
@@ -47,7 +47,7 @@ module block_data(
 	input wire nreset, 
 	input wire valid_i,
 	input wire [1:0] cmd_i,
-	input wire [5:0] data_i,
+	input wire [7:0] data_i,
 
 	output wire         data_v_o,
 	output wire [7:0]   data_o,
@@ -80,7 +80,7 @@ module block_data(
 		if (~nreset | start_v) begin
 			cnt_q <= '0;
 		end else begin
-			{unused_cnt_q, cnt_q} <= cnt_q + data_v;
+			{unused_cnt_q, cnt_q} <= cnt_q + {5'b0, data_v};
 		end
 	end
 

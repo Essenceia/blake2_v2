@@ -17,7 +17,9 @@ module blake2 #(
 	parameter R2     = 24,
 	parameter R3     = 16,
 	parameter R4     = 63,
-	parameter R      = 4'd12 // 4'b1100 number of rounds in v srambling
+	parameter R      = 4'd12, // 4'b1100 number of rounds in v srambling
+	localparam BB_CLOG2 = $clog2(BB),
+	localparam W_CLOG2 = $clog2(W)
 	)
 	(
 	input               clk,
@@ -30,14 +32,13 @@ module blake2 #(
 	input wire          block_first_i,               
 	input wire          block_last_i,               
 	
-	input        data_v_i,
-	input [3:0]  data_idx_i,	
-	input [7:0]  data_i,
+	input               data_v_i,
+	input [BB_CLOG2-1:0]  data_idx_i,	
+	input [7:0]         data_i,
 	
 	output       finished_o,
 	output [7:0] h_o
 	);
-	localparam BB_clog2 = $clog2(BB); 
 	localparam IB_CNT_W = BB - $clog2(BB);
 	 
 	reg  [2:0] g_idx_q; // G function idx, sub-round
@@ -54,7 +55,9 @@ module blake2 #(
 	wire [W-1:0] v_current[15:0];
 	reg  [W-1:0] v_q[15:0];
 	wire [W-1:0] h_last[7:0];
-	wire [W*8-1:0] h_res_next;
+	wire [W*8-1:0] h_flat;
+	wire [W*8-1:0] h_shift_next;
+	wire [W-1:0] h_shift_next_matrix[7:0];
 	reg  [W-1:0] h_q[7:0];
 	
 	reg  [W*16-1:0] m_q;
@@ -104,15 +107,15 @@ module blake2 #(
 	// fsm
 	reg first_block_q; 
 	reg last_block_q; 
-	reg fsm_q;
+	reg [2:0] fsm_q;
 	wire f_finished;
-	reg res_cnt_q;
+	reg [W_CLOG2-1:0] res_cnt_q;
 
-	localparam S_IDLE = 'd0;
-	localparam S_WAIT_DATA = 'd1;
-	localparam S_F = 'd2;
-	localparam S_F_END = 'd3; // write back h, save on mux on path to write back v to h
-	localparam S_RES = 'd4;
+	localparam S_IDLE = 3'd0;
+	localparam S_WAIT_DATA = 3'd1;
+	localparam S_F = 3'd2;
+	localparam S_F_END = 3'd3; // write back h, save on mux on path to write back v to h
+	localparam S_RES = 3'd4;
 
 	always @(posedge clk) begin
 		if (~nreset) begin
@@ -158,7 +161,7 @@ module blake2 #(
 
 	reg unused_block_idx_q;	
 	always @(posedge clk) begin
-		if (S_IDLE | S_RES) 
+		if ( (fsm_q == S_IDLE) | (fsm_q == S_RES)) 
 			block_idx_q <= '0;
 		else 
 			{unused_block_idx_q, block_idx_q} <= block_idx_q + {{IB_CNT_W-1{1'b0}},1'd1};
@@ -194,7 +197,7 @@ module blake2 #(
 	// Function F
 	//
 	// Calculate t, TODO block index increment
-	assign t = last_block_q ? ll_i: {block_idx_q, {BB_clog2{1'b0}}};
+	assign t = last_block_q ? ll_i: {block_idx_q, {BB_CLOG2{1'b0}}};
 	//
 	// Initialize local work vector v[0..15]
 	// v[0..7]  := h[0..7]              // First half from state.
@@ -385,10 +388,10 @@ module blake2 #(
 			m_q <= {data_i, m_q[511:8]};
 	end
 
-	genvar m_q_i;
+	genvar i_m_q;
 	generate
-		for(m_q_i=0; m_q_i<16; m_q_i=m_q_i+1 ) begin : loop_m_q_i
-			assign m_matrix[m_q_i] = m_q[m_q_i];
+		for(i_m_q=0; i_m_q<16; i_m_q=i_m_q+1 ) begin : loop_i_m_q
+			assign m_matrix[i_m_q] = m_q[(i_m_q+1)*W-1:i_m_q*W];
 		end
 	endgenerate
 		
@@ -397,19 +400,22 @@ module blake2 #(
 	// END FOR.
 	generate
 		for(h_idx=0; h_idx<8; h_idx=h_idx+1 ) begin : loop_h_o
-			assign h_last[(h_idx+1)*W-1:h_idx*W] = f_h[h_idx] ^ v_q[h_idx] ^ v_q[h_idx+8];
-			assign h_res_next[(h_idx+1)*W-1:h_idx*W] = h_q[h_idx];
+			assign h_last[h_idx] = f_h[h_idx] ^ v_q[h_idx] ^ v_q[h_idx+8];
+			assign h_flat[(h_idx+1)*W-1:h_idx*W] = h_q[h_idx];
+			assign h_shift_next_matrix[h_idx] = h_shift_next[(h_idx+1)*W-1:h_idx*W];
 		end
 	endgenerate
+
+	assign h_shift_next = {8'b0, h_flat[W*8-1:8]};
 
 	always @(posedge clk) 
 		if (fsm_q == S_F_END) 
 			h_q <= h_last;
 		else if (fsm_q == S_RES)
-			h_q <= {8'b0, h_res_next[W*8-1:8]};
+			h_q <= h_shift_next_matrix;
 
 	// output streaming
 	always @(posedge clk)
-		h_o <= h_q[7:0];
+		h_o <= h_q[0][7:0];
 	
 endmodule
