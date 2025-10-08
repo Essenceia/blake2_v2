@@ -22,6 +22,7 @@ module top(
 	wire block_first, block_last; 
 
 	assign uio_oe = 8'b0000_1000;
+	assign uio_out[7:1] = 7'd0;
 
 	io_intf m_io_intf(
 		.clk(clk),

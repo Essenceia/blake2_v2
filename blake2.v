@@ -116,8 +116,6 @@ module blake2 #(
 
 	always @(posedge clk) begin
 		if (~nreset) begin
-			first_block_q <= 1'b0;
-			last_block_q <= 1'b0;
 			fsm_q <= S_IDLE;
 		end else begin
 			case (fsm_q) 
@@ -402,16 +400,18 @@ module blake2 #(
 			assign h_last[h_idx] = f_h[h_idx] ^ v_q[h_idx] ^ v_q[h_idx+8];
 			assign h_flat[(h_idx+1)*W-1:h_idx*W] = h_q[h_idx];
 			assign h_shift_next_matrix[h_idx] = h_shift_next[(h_idx+1)*W-1:h_idx*W];
+
+			always @(posedge clk) 
+				if (fsm_q == S_F_END) 
+					h_q[h_idx] <= h_last[h_idx];
+				else if (fsm_q == S_RES)
+					h_q[h_idx] <= h_shift_next_matrix[h_idx];
 		end
 	endgenerate
 
 	assign h_shift_next = {8'b0, h_flat[W*8-1:8]};
 
-	always @(posedge clk) 
-		if (fsm_q == S_F_END) 
-			h_q <= h_last;
-		else if (fsm_q == S_RES)
-			h_q <= h_shift_next_matrix;
+
 
 	// output streaming
 	reg [7:0] h_o_q;
