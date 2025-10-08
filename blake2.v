@@ -246,7 +246,8 @@ module blake2 #(
 	// v := G( v, 2, 7,  8, 13, m[s[12]], m[s[13]] ) 6
 	// v := G( v, 3, 4,  9, 14, m[s[14]], m[s[15]] ) 7
 
-	reg [W-1:0] g_a, g_b, g_c, g_d, g_x, g_y;
+	reg  [W-1:0] g_a, g_b, g_c, g_d;
+	wire [W-1:0] g_x, g_y;
 	always @(*) begin 
 		case(g_idx_q[1:0])
 			0: g_a = v_current[0];
