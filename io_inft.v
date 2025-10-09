@@ -86,7 +86,7 @@ module block_data(
 		if (~nreset | conf_v) begin
 			cnt_q <= '0;
 		end else begin
-			{unused_cnt_q, cnt_q} <= cnt_q + {5'b0, data_v};
+			{unused_cnt_q, cnt_q} <= cnt_q + {5'b0, data_v_q};
 		end
 	end
 
@@ -98,13 +98,18 @@ module block_data(
 	end
 
 	always @(posedge clk) begin
-		if (~nreset | (cnt_q == 6'd63))begin
-			start_q <= '0;
-			last_q <= '0;
-		end else if (start_v | last_v) begin
+		if ((~nreset) | (cnt_q == 6'd63))
+				start_q <= '0;
+		else if (start_v)
 			start_q <= start_v;
+	end
+
+
+	always @(posedge clk) begin
+		if ((~nreset) | (cnt_q == 6'd63))
+				last_q <= '0;
+		else if (last_v)
 			last_q <= last_v;
-		end
 	end
 
 	assign data_v_o = data_v_q;

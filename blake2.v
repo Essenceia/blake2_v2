@@ -123,7 +123,7 @@ module blake2 #(
 				S_WAIT_DATA: fsm_q <= (data_v_i & (data_idx_i == 6'd63))? S_F : S_WAIT_DATA;
 				S_F: fsm_q <= f_finished ? S_F_END : S_F;
 				S_F_END: fsm_q <= last_block_q ? S_RES : S_WAIT_DATA;
-				S_RES: fsm_q <= res_cnt_q == 'd31 ? S_IDLE: S_RES;
+				S_RES: fsm_q <= res_cnt_q == nn_i ? S_IDLE: S_RES;
 				default : fsm_q <= S_IDLE; 
 			endcase
 		end

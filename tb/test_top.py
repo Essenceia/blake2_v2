@@ -2,13 +2,14 @@ import cocotb
 from cocotb.triggers import FallingEdge, Timer
 import logging
 import math 
+import hashlib
+import random 
 
 BB=64 
 
 def get_cmd(valid=True, conf=False, start=False, data=False, last=False):
-    assert( not(conf) or ( conf and not(start) and not(last)))
-    assert( not(start) or ( start and not(conf) and not(last)))
-    assert( not(last) or ( last and not(start) and not(conf)))
+    check = [conf, start, data, last]
+    assert(sum(check) <= 1) # check one hot 0
     cmd = 0
     if (start):
         cmd = 1;
@@ -19,7 +20,7 @@ def get_cmd(valid=True, conf=False, start=False, data=False, last=False):
     return valid | cmd << 1
     
 async def generate_clock(dut):
-    for _ in range(100):
+    while(1):
         dut.clk.value = 0
         await Timer(1, unit="ns")
         dut.clk.value = 1
@@ -75,6 +76,21 @@ async def send_data_to_hash(dut, key=b'', data=b''):
         await write_data_in(dut, padded_data[i*BB:((i+1)*BB)], start, last)
         start = False
     dut.uio_in.value = 0
+
+
+async def test_random_hash(dut):
+    ll = random.randrange(65)
+    nn = random.randrange(1,33)
+    kk=0
+    key = random.randbytes(kk)
+    data = random.randbytes(ll)
+    h = hashlib.blake2s(data, digest_size=nn, key=key)
+    cocotb.log.info("data(%s): %s", ll, data.hex())
+    cocotb.log.info("hash(%s): %s", nn, h.hexdigest())
+    await write_config(dut, kk, nn , ll)
+    await Timer(2, unit="ns")
+    await send_data_to_hash(dut, b'', data)
+ 
 @cocotb.test()
 async def rst_test(dut):
     """Try accessing the design."""
@@ -91,8 +107,6 @@ async def rst_test(dut):
     dut.rst_n.value = 1
     cocotb.log.info("rst_n is %s", dut.rst_n.value)
     await Timer(4, unit="ns")
-    await write_config(dut, 1,2,0xdeadbeef)
-    await Timer(2, unit="ns")
-    await send_data_to_hash(dut, b'', b'\xbe\xef\xbe\xef')
-    await Timer(2, unit="ns")
-    await send_data_to_hash(dut, b'\x01', b'\xbe\xef\xbe\xef')
+    await test_random_hash(dut)
+    await Timer(250, unit="ns")
+    #await send_data_to_hash(dut, b'\x01', b'\xbe\xef\xbe\xef')
