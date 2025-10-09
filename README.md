@@ -22,6 +22,8 @@ interface is only 8 bits wide.
 Given `CVC` is currently the only free-of-charge ( not open source, but free for none comercial applications )
 simulator supporting SDF ( Standard Delay Format ), we will be using it for running our testing. 
 
-
+As such, I will be using `cocotb` to validate this design as it allows to easily 
+switch between multiple simulators on the backend and will simplify porting of the
+tb to tapeout flows that also used `cocotb`. 
 
 **Note** SVF used for gate-level simulation with timing information.
