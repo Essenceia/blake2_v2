@@ -1,0 +1,23 @@
+[*]
+[*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
+[*] Thu Oct  9 16:17:02 2025
+[*]
+[dumpfile] "/home/pitchu/rtl/blake2/tb/sim_build/top.fst"
+[dumpfile_mtime] "Thu Oct  9 16:15:41 2025"
+[dumpfile_size] 2525
+[savefile] "/home/pitchu/rtl/blake2/conf/top_view.gtkw"
+[timestart] 0
+[size] 1910 295
+[pos] -1 -1
+*-12.000000 1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[sst_width] 290
+[signals_width] 78
+[sst_expanded] 1
+[sst_vpaned_height] 58
+@28
+top.clk
+@29
+top.rst_n
+[pattern_trace] 1
+[pattern_trace] 0
