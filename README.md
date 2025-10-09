@@ -12,3 +12,4 @@ It has been optimized for area usage ahead of an ASIC tapeout, at the
 expense of performance. This design is current I/O bottlnecked as the block data
 interface is only 8 bits wide. 
 
+![asic floorplan](/doc/layout.png)
