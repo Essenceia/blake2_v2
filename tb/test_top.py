@@ -5,6 +5,19 @@ import math
 
 BB=64 
 
+def get_cmd(valid=True, conf=False, start=False, data=False, last=False):
+    assert( not(conf) or ( conf and not(start) and not(last)))
+    assert( not(start) or ( start and not(conf) and not(last)))
+    assert( not(last) or ( last and not(start) and not(conf)))
+    cmd = 0
+    if (start):
+        cmd = 1;
+    elif (data):
+        cmd = 2
+    elif (last):
+        cmd = 3
+    return valid | cmd << 1
+    
 async def generate_clock(dut):
     for _ in range(100):
         dut.clk.value = 0
@@ -25,23 +38,23 @@ async def write_config(dut, kk, nn, ll):
         await Timer(2, unit="ns")
     dut.uio_in.value = 0
 
-async def write_data_in(dut, block=b'', first=False, last=False):
+async def write_data_in(dut, block=b'', start=False, last=False):
     cocotb.log.info("block len %s", len(block))
     assert(len(block) == BB )
     #todo add ready signal 
     for i in range(0,BB): 
-        dut.uio_in.value = 0x03
-        if (i == 0) and first: 
-            dut.uio_in.value = 0x05
+        dut.uio_in.value = get_cmd(data=True)
+        if (i == 0) and start: 
+            dut.uio_in.value = get_cmd(start=True)
         if (i == BB - 1) and last: 
-            dut.uio_in.value = 0x07 
+            dut.uio_in.value = get_cmd(last=True)
         dut.ui_in.value = block[i]
         await Timer(2, unit="ns")
 
 # lengths are in bytes
 async def send_data_to_hash(dut, key=b'', data=b''):
     cocotb.log.info("write_data key(%s) data(%s)", len(key), len(data))
-    first = True
+    start = True
     last = False
 
     assert(len(data) > 0) 
@@ -49,8 +62,8 @@ async def send_data_to_hash(dut, key=b'', data=b''):
         assert (len(key) <= BB/32)
         tmp = key.ljust(BB, b'\x00')
         cocotb.log.debug("key %s", len(tmp))
-        await write_data_in(dut, tmp, first, False) 
-        first = False
+        await write_data_in(dut, tmp, start, False) 
+        start = False
 
     block_count = math.ceil(len(data)/BB)
     padded_size = block_count * BB
@@ -59,8 +72,8 @@ async def send_data_to_hash(dut, key=b'', data=b''):
     for i in range(0, block_count):
         if ( i == block_count - 1): 
             last=True
-        await write_data_in(dut, padded_data[i*BB:((i+1)*BB)], first, last)
-        first = False
+        await write_data_in(dut, padded_data[i*BB:((i+1)*BB)], start, last)
+        start = False
     dut.uio_in.value = 0
 @cocotb.test()
 async def rst_test(dut):
