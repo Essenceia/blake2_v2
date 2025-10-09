@@ -20,9 +20,12 @@ module byte_size_config(
 	reg [7:0]  kk_q;
 	reg [7:0]  nn_q;
 	reg [63:0] ll_q;
+	wire       config_v; 
+
+	assign config_v = valid_i & config_v_i;
 
 	always @(posedge clk) begin
-		if ((~nreset) | (valid_i & ~config_v_i)) begin
+		if ((~nreset) | ~valid_i | (valid_i & ~config_v_i)) begin
 			cfg_cnt_q <= '0;
 		end else begin
 			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + 'd1;
@@ -30,11 +33,13 @@ module byte_size_config(
 	end
 
 	always @(posedge clk) begin
-		case(cfg_cnt_q) 
-			CFG_CNT_KK: kk_q <= data_i;
-			CFG_CNT_NN: nn_q <= data_i;
-			default: ll_q <= {ll_q[55:0] , data_i}; 
-		endcase
+		if (config_v) begin
+			case(cfg_cnt_q) 
+				CFG_CNT_KK: kk_q <= data_i;
+				CFG_CNT_NN: nn_q <= data_i;
+				default: ll_q <= {data_i, ll_q[63:8]}; 
+			endcase
+		end
 	end
 
 	assign kk_o = kk_q;

@@ -45,10 +45,10 @@ endmodule
 //      END FUNCTION.
 module G #(
 	parameter W=32,
-	parameter R1,
-	parameter R2,
-	parameter R3,
-	parameter R4
+	parameter R1=16,
+	parameter R2=12,
+	parameter R3=8,
+	parameter R4=7
 	)(
 	input [W-1:0]  a_i,
 	input [W-1:0]  b_i,

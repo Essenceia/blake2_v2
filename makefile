@@ -34,7 +34,7 @@ endif
 ############
 
 # Define simulator we are using, priority to iverilog
-SIM ?= V
+SIM ?= verilator
 $(info Using simulator: $(SIM))
 
 ###########
@@ -54,7 +54,7 @@ DEFINES := $(if $(wave),wave=1)
 
 # Lint variables.
 LINT_FLAGS :=
-ifeq ($(SIM),I)
+ifeq ($(SIM),icarus)
 LINT_FLAGS +=-Wall -g2012 $(if $(assert),-gassertions) -gstrict-expr-width
 LINT_FLAGS +=$(if $(debug),-DDEBUG) 
 else
@@ -64,7 +64,7 @@ LINT_FLAGS +=$(if $(wip),-Wno-UNUSEDSIGNAL)
 endif
 
 # Lint commands.
-ifeq ($(SIM),I)
+ifeq ($(SIM),icarus)
 define LINT
 	mkdir -p build
 	iverilog $(LINT_FLAGS) -s $2 -o $(BUILD_DIR)/$2 $1
@@ -91,7 +91,7 @@ endif
 #########
 
 # Build variables.
-ifeq ($(SIM),I)
+ifeq ($(SIM),icarus)
 BUILD_DIR := build
 BUILD_FLAGS := 
 else
@@ -107,7 +107,7 @@ BUILD_FLAGS += -j $(MAKE_THREADS)
 endif
 
 # Build commands.
-ifeq ($(SIM),I)
+ifeq ($(SIM),icarus)
 define BUILD
 	mkdir -p build
 	iverilog $(LINT_FLAGS) -s $2 -o $(BUILD_DIR)/$2 $1
@@ -124,7 +124,7 @@ endif
 #######
 
 # Run commands.
-ifeq ($(SIM),I)
+ifeq ($(SIM),icarus)
 define RUN
 	mkdir -p wave
 	vvp $(BUILD_DIR)/$1
