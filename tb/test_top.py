@@ -25,40 +25,43 @@ async def write_config(dut, kk, nn, ll):
         await Timer(2, unit="ns")
     dut.uio_in.value = 0
 
-async def write_data_in(dut, block=b''):
+async def write_data_in(dut, block=b'', first=False, last=False):
     cocotb.log.info("block len %s", len(block))
     assert(len(block) == BB )
     #todo add ready signal 
     for i in range(0,BB): 
-        dut.uio_in.value = block[i]
+        dut.uio_in.value = 0x03
+        if (i == 0) and first: 
+            dut.uio_in.value = 0x05
+        if (i == BB - 1) and last: 
+            dut.uio_in.value = 0x07 
+        dut.ui_in.value = block[i]
         await Timer(2, unit="ns")
 
 # lengths are in bytes
 async def send_data_to_hash(dut, key=b'', data=b''):
     cocotb.log.info("write_data key(%s) data(%s)", len(key), len(data))
-    
+    first = True
+    last = False
+
     assert(len(data) > 0) 
-    dut.uio_in.value = 0x03
     if len(key) > 0:
         assert (len(key) <= BB/32)
         tmp = key.ljust(BB, b'\x00')
         cocotb.log.debug("key %s", len(tmp))
-        await write_data_in(dut, tmp) 
-        dut.uio_in.value = 0x05
+        await write_data_in(dut, tmp, first, False) 
+        first = False
 
     block_count = math.ceil(len(data)/BB)
     padded_size = block_count * BB
     padded_data = data.ljust(padded_size, b'\x00')
     cocotb.log.debug("data %s", len(padded_data))
     for i in range(0, block_count):
-        if ((len(key) == 0 ) and (i == 0)): 
-            dut.uio_in.value = 0x03
-        else:
-            dut.uio_in.value = 0x05
         if ( i == block_count - 1): 
-            dut.uio_in.value = 0x07
-        await write_data_in(dut, padded_data[i*BB:((i+1)*BB)])
-
+            last=True
+        await write_data_in(dut, padded_data[i*BB:((i+1)*BB)], first, last)
+        first = False
+    dut.uio_in.value = 0
 @cocotb.test()
 async def rst_test(dut):
     """Try accessing the design."""
@@ -66,15 +69,17 @@ async def rst_test(dut):
     dut.rst_n.value = 0
     cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
     
-    await Timer(5, unit="ns")
+    await Timer(4, unit="ns")
     # set default io
     dut.ui_in.value = 0
     dut.uio_in.value = 0
-    await Timer(5, unit="ns")  # wait a bit
+    await Timer(4, unit="ns")  # wait a bit
     await FallingEdge(dut.clk)  # wait for falling edge/"negedge"
     dut.rst_n.value = 1
     cocotb.log.info("rst_n is %s", dut.rst_n.value)
-    await Timer(5)
+    await Timer(4, unit="ns")
     await write_config(dut, 1,2,0xdeadbeef)
+    await Timer(2, unit="ns")
+    await send_data_to_hash(dut, b'', b'\xbe\xef\xbe\xef')
+    await Timer(2, unit="ns")
     await send_data_to_hash(dut, b'\x01', b'\xbe\xef\xbe\xef')
-    await Timer(100, unit="ns")

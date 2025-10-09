@@ -69,6 +69,7 @@ module block_data(
 	reg [7:0] data_q;
 	reg [5:0] cnt_q;
 	reg       unused_cnt_q;
+	wire      conf_v;
 	wire      data_v;
 	wire      start_v;
 	reg       start_q;
@@ -79,9 +80,10 @@ module block_data(
 	assign start_v = valid_i & (cmd_i == CMD_START);	
 	assign last_v = valid_i & (cmd_i == CMD_LAST);	
 	assign data_v = valid_i & ~(cmd_i == CMD_CONF); 
+	assign conf_v = valid_i & (cmd_i == CMD_CONF);
 
 	always @(posedge clk) begin
-		if (~nreset | start_v) begin
+		if (~nreset | conf_v) begin
 			cnt_q <= '0;
 		end else begin
 			{unused_cnt_q, cnt_q} <= cnt_q + {5'b0, data_v};
