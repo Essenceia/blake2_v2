@@ -2,6 +2,7 @@
 // A simple blake2s Reference Implementation.
 
 #include "blake2s.h"
+#include <stdio.h>
 
 // Cyclic right rotation.
 
@@ -98,6 +99,8 @@ int blake2s_init(blake2s_ctx *ctx, size_t outlen,
     for (i = 0; i < 8; i++)             // state, "param block"
         ctx->h[i] = blake2s_iv[i];
     ctx->h[0] ^= 0x01010000 ^ (keylen << 8) ^ outlen;
+
+	printf("h_init 0x%08X\n", ctx->h[0]);
 
     ctx->t[0] = 0;                      // input count low word
     ctx->t[1] = 0;                      // input count high word

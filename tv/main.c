@@ -15,20 +15,20 @@ int main(){
 	d[1] = 'b';
 	d[2] = 'c';	
 
-	printf("\"inlen\":%ld,\"in[%ld:0]\":\"", IN_SIZE, IN_SIZE*8-1);
-	for(i=IN_SIZE;i>=0;i--){
+	printf("inlen: %ld, in[%ld:0]: 0x", IN_SIZE, IN_SIZE*8-1);
+	for(i=IN_SIZE;i--;){
 		printf("%02X",d[i]);
 	}
-	printf("\"\n");
+	printf("\n");
 	
 	// uint8_t *out, const void *in, const void *key, size_t outlen, size_t inlen, size_t keylen );	
 	blake2s(&o, OUT_SIZE, NULL, 0, &d, IN_SIZE);		
 	
-	printf("\",\"outlen\":%ld,\"out[%ld:0]\":\"", OUT_SIZE, OUT_SIZE*8-1);
-	for( i =OUT_SIZE; i>=0 ;i-- ){
+	printf("outlen: %ld, out[%ld:0]: 0x", OUT_SIZE, OUT_SIZE*8-1);
+	for( i =OUT_SIZE;i-->0;){
 		printf("%02X",o[i]);
 	};
-	printf("\"\n");
+	printf("\n");
 	
 	return 0;
 }

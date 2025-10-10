@@ -7,7 +7,10 @@ FLAGS = -Wall -Wextra -Wconversion -Wshadow -Wundef -fno-common  -Wno-unused-par
 CC = cc $(if $(debug),-DDEBUG -g)
 LD = cc
 
-blake2 : main.o file.o rand.o
+run: blake2 
+	./blake2
+
+blake2 : main.o blake2s.o
 	$(LD) -o blake2 -g main.o blake2s.o 
 
 main.o : main.c
