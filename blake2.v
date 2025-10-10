@@ -18,15 +18,16 @@ module blake2 #(
 	parameter R3     = 16,
 	parameter R4     = 63,
 	parameter R      = 4'd12, // 4'b1100 number of rounds in v srambling
-	localparam BB_CLOG2 = $clog2(BB),
-	localparam W_CLOG2 = $clog2(W)
+	localparam BB_CLOG2   = $clog2(BB),
+	localparam W_CLOG2    = $clog2(W),
+	localparam W_CLOG2_P1 = $clog2((W+1)) // double paranthesis needed: verilator parsing bug
 	)
 	(
 	input               clk,
 	input               nreset,
 
-	input [7:0]         kk_i,
-	input [7:0]         nn_i,
+	input [W_CLOG2_P1-1:0]         kk_i,
+	input [W_CLOG2_P1-1:0]         nn_i,
 	input [BB-1:0]      ll_i,
 
 	input wire          block_first_i,               
@@ -106,7 +107,7 @@ module blake2 #(
 	reg last_block_q; 
 	reg [2:0] fsm_q;
 	wire f_finished;
-	reg [W_CLOG2-1:0] res_cnt_q;
+	reg [W_CLOG2_P1-1:0] res_cnt_q;
 
 	localparam S_IDLE = 3'd0;
 	localparam S_WAIT_DATA = 3'd1;
@@ -185,7 +186,7 @@ module blake2 #(
 	endgenerate
 	// Parameter block p[0]
 	// h[0] := h[0] ^ 0x01010000 ^ (kk << 8) ^ nn
-	assign h_init[0] = IV[0] ^ {{W-32{1'b0}},32'h01010000} ^ {{W-16{1'b0}},kk_i,{8{1'b0}}} ^ {{W-8{1'b0}} , nn_i};
+	assign h_init[0] = IV[0] ^ {{W-32{1'b0}},32'h01010000} ^ {{W-W_CLOG2_P1-8{1'b0}},  kk_i ,{8{1'b0}}} ^ {{W-W_CLOG2_P1{1'b0}} , nn_i};
 	
 
 	//----------

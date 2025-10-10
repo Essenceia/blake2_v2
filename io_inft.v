@@ -5,8 +5,8 @@ module byte_size_config(
 	input wire config_v_i,
 	input wire [7:0] data_i,
 
-	output wire [7:0]  kk_o,
-	output wire [7:0]  nn_o,
+	output wire [6:0]  kk_o,
+	output wire [6:0]  nn_o,
 	output wire [63:0] ll_o
 ); 
 	// configuration
@@ -17,8 +17,7 @@ module byte_size_config(
 
 	reg       unused_cfg_cnt_q;
 	reg [3:0]  cfg_cnt_q; 
-	reg [7:0]  kk_q;
-	reg [7:0]  nn_q;
+	reg [6:0]  kk_q, nn_q;
 	reg [63:0] ll_q;
 	wire       config_v; 
 
@@ -35,8 +34,8 @@ module byte_size_config(
 	always @(posedge clk) begin
 		if (config_v) begin
 			case(cfg_cnt_q) 
-				CFG_CNT_KK: kk_q <= data_i;
-				CFG_CNT_NN: nn_q <= data_i;
+				CFG_CNT_KK: kk_q <= data_i[6:0];
+				CFG_CNT_NN: nn_q <= data_i[6:0];
 				default: ll_q <= {data_i, ll_q[63:8]}; 
 			endcase
 		end
@@ -134,8 +133,8 @@ module io_intf(
 	input wire       hash_finished_i,
 	input wire [7:0] hash_i,
 
-	output wire [7:0]  kk_o,
-	output wire [7:0]  nn_o,
+	output wire [6:0]  kk_o,
+	output wire [6:0]  nn_o,
 	output wire [63:0] ll_o,
 
 	output wire       data_v_o,

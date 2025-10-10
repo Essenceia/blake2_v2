@@ -44,8 +44,8 @@ module blake2s_hash256(
 	input          clk,
 	input 	       nreset,
 
-	input [7:0]         kk_i,
-	input [7:0]         nn_i,
+	input [5:0]         kk_i,
+	input [5:0]         nn_i,
 	input [63:0]        ll_i,
 
 	input wire          block_first_i,               
