@@ -5,8 +5,8 @@ module byte_size_config(
 	input wire config_v_i,
 	input wire [7:0] data_i,
 
-	output wire [6:0]  kk_o,
-	output wire [6:0]  nn_o,
+	output wire [5:0]  kk_o,
+	output wire [5:0]  nn_o,
 	output wire [63:0] ll_o
 ); 
 	// configuration
@@ -17,7 +17,7 @@ module byte_size_config(
 
 	reg       unused_cfg_cnt_q;
 	reg [3:0]  cfg_cnt_q; 
-	reg [6:0]  kk_q, nn_q;
+	reg [5:0]  kk_q, nn_q;
 	reg [63:0] ll_q;
 	wire       config_v; 
 
@@ -34,8 +34,8 @@ module byte_size_config(
 	always @(posedge clk) begin
 		if (config_v) begin
 			case(cfg_cnt_q) 
-				CFG_CNT_KK: kk_q <= data_i[6:0];
-				CFG_CNT_NN: nn_q <= data_i[6:0];
+				CFG_CNT_KK: kk_q <= data_i[5:0];
+				CFG_CNT_NN: nn_q <= data_i[5:0];
 				default: ll_q <= {data_i, ll_q[63:8]}; 
 			endcase
 		end
@@ -121,7 +121,9 @@ endmodule
 module io_intf(
 	// I/O
 	input wire clk, 
-	input wire nreset, 
+	input wire nreset,
+	
+	input wire       en_i, 
 	input wire       valid_i,
 	input wire [1:0] cmd_i,
 	input wire [7:0] data_i,
@@ -133,8 +135,8 @@ module io_intf(
 	input wire       hash_finished_i,
 	input wire [7:0] hash_i,
 
-	output wire [6:0]  kk_o,
-	output wire [6:0]  nn_o,
+	output wire [5:0]  kk_o,
+	output wire [5:0]  nn_o,
 	output wire [63:0] ll_o,
 
 	output wire       data_v_o,
@@ -145,10 +147,20 @@ module io_intf(
 );
 	parameter CMD_CONF  = 2'd0;  
 
+	// use project slice enable to gate design in order 
+	// to help reduce overall tt chip dynamic power 
+	// aka: play nice with other projects and be a responsible
+	//      project participant
+	reg en_q;
+	wire valid; 
+	always @(posedge clk) 
+		en_q <= en_i;
+	assign valid_i = en_q & valid_i;
+
 	byte_size_config m_config(
 		.clk(clk),
 		.nreset(nreset),
-		.valid_i(valid_i),
+		.valid_i(valid),
 		.config_v_i(cmd_i == CMD_CONF),
 		.data_i(data_i),
 
@@ -160,7 +172,7 @@ module io_intf(
 	block_data m_block_data(
 		.clk(clk), 
 		.nreset(nreset), 
-		.valid_i(valid_i),
+		.valid_i(valid),
 		.cmd_i(cmd_i),
 		.data_i(data_i),
 

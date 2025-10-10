@@ -13,7 +13,7 @@ module top(
 	wire hash_finished;
 	wire [7:0] hash;
 	
-	wire [6:0] kk,nn;
+	wire [5:0] kk,nn;
 	wire [63:0] ll; 
 	
 	wire data_v; 
