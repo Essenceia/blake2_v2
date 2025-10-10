@@ -77,6 +77,15 @@ async def send_data_to_hash(dut, key=b'', data=b''):
         start = False
     dut.uio_in.value = 0
 
+async def test_hash(dut, kk, nn, ll, key, data):
+    h = hashlib.blake2s(data, digest_size=nn, key=key)
+    cocotb.log.info("data(%s): %s", ll, data.hex())
+    cocotb.log.info("hash(%s): %s", nn, h.hexdigest())
+    await write_config(dut, kk, nn , ll)
+    await Timer(2, unit="ns")
+    await send_data_to_hash(dut, key, data)
+    await Timer(250, unit="ns")
+   
 
 async def test_random_hash(dut):
     ll = random.randrange(65)
@@ -84,12 +93,7 @@ async def test_random_hash(dut):
     kk=0
     key = random.randbytes(kk)
     data = random.randbytes(ll)
-    h = hashlib.blake2s(data, digest_size=nn, key=key)
-    cocotb.log.info("data(%s): %s", ll, data.hex())
-    cocotb.log.info("hash(%s): %s", nn, h.hexdigest())
-    await write_config(dut, kk, nn , ll)
-    await Timer(2, unit="ns")
-    await send_data_to_hash(dut, b'', data)
+    await test_hash(dut, kk, nn, ll, b'', data)
 
 async def rst(dut, ena=1):
     dut.rst_n.value = 0
@@ -118,12 +122,16 @@ async def dissable_test(dut):
         assert(dut.uo_out.value == uo_out)
         assert(dut.uio_out.value == 0)
         Timer(2, unit="ns")
-    
+   
+# blake2 spec, appandix C blake2s test vector
+@cocotb.test()
+async def hash_spec_test(dut):
+    await rst(dut)
+    await test_hash(dut, 0, 32, 3, b'', b"abc")
+
 @cocotb.test()
 async def hash_test(dut):
     await rst(dut)
-    dut.ena.value = 1
     await Timer(4, unit="ns")
     await test_random_hash(dut)
-    await Timer(250, unit="ns")
     #await send_data_to_hash(dut, b'\x01', b'\xbe\xef\xbe\xef')
