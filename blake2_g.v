@@ -101,7 +101,7 @@ module G #(
 	// v[d] := (v[d] ^ v[a]) >>> R3
 	right_rot #(R3 , W) m_rot_2
 	(
-		.data_i((d0 ^ a0)),
+		.data_i((d0 ^ a_o)),
 		.data_o(d_o)
 	);
 

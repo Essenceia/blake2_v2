@@ -19,8 +19,8 @@
     (((uint32_t) ((uint8_t *) (p))[3]) << 24))
 // Mixing function G.
 
-#define B2S_G(a, b, c, d, x, y) {   \
-	printf("G(a: 0x%08X, b: 0x%08X, c: 0x%08X, d: 0x%08X, x: 0x%08X, y: 0x%08X)\n", a, b, c, d, (x), (y));\
+#define B2S_G(r, a, b, c, d, x, y, n) {   \
+	printf("%02d G_%02d     (a: 0x%08X, b: 0x%08X, c: 0x%08X, d: 0x%08X, x: 0x%08X, y: 0x%08X)\n",r, n, v[a], v[b], v[c], v[d], (x), (y));\
     v[a] = v[a] + v[b] + x;         \
     v[d] = ROTR32(v[d] ^ v[a], 16); \
     v[c] = v[c] + v[d];             \
@@ -28,7 +28,8 @@
     v[a] = v[a] + v[b] + y;         \
     v[d] = ROTR32(v[d] ^ v[a], 8);  \
     v[c] = v[c] + v[d];             \
-    v[b] = ROTR32(v[b] ^ v[c], 7); }
+    v[b] = ROTR32(v[b] ^ v[c], 7);  \ 
+	printf("%02d G_%02d res (a: 0x%08X, b: 0x%08X, c: 0x%08X, d: 0x%08X)\n", r, n, v[a], v[b], v[c], v[d]);}
 
 // Initialization Vector.
 
@@ -75,14 +76,16 @@ static void blake2s_compress(blake2s_ctx *ctx, int last)
 	}
 
     for (i = 0; i < 10; i++) {          // ten rounds
-        B2S_G( 0, 4,  8, 12, m[sigma[i][ 0]], m[sigma[i][ 1]]);
-        B2S_G( 1, 5,  9, 13, m[sigma[i][ 2]], m[sigma[i][ 3]]);
-        B2S_G( 2, 6, 10, 14, m[sigma[i][ 4]], m[sigma[i][ 5]]);
-        B2S_G( 3, 7, 11, 15, m[sigma[i][ 6]], m[sigma[i][ 7]]);
-        B2S_G( 0, 5, 10, 15, m[sigma[i][ 8]], m[sigma[i][ 9]]);
-        B2S_G( 1, 6, 11, 12, m[sigma[i][10]], m[sigma[i][11]]);
-        B2S_G( 2, 7,  8, 13, m[sigma[i][12]], m[sigma[i][13]]);
-        B2S_G( 3, 4,  9, 14, m[sigma[i][14]], m[sigma[i][15]]);
+		printf("---------\n");
+        B2S_G( i, 0, 4,  8, 12, m[sigma[i][ 0]], m[sigma[i][ 1]], 0);
+		printf("m[s[2]]: %d/0x%02X, s[3]: %d/0x%02X\n", sigma[i][2], m[sigma[i][2]], sigma[i][3], m[sigma[i][3]]);
+        B2S_G( i, 1, 5,  9, 13, m[sigma[i][ 2]], m[sigma[i][ 3]], 1);
+        B2S_G( i, 2, 6, 10, 14, m[sigma[i][ 4]], m[sigma[i][ 5]], 2);
+        B2S_G( i, 3, 7, 11, 15, m[sigma[i][ 6]], m[sigma[i][ 7]], 3);
+        B2S_G( i, 0, 5, 10, 15, m[sigma[i][ 8]], m[sigma[i][ 9]], 4);
+        B2S_G( i, 1, 6, 11, 12, m[sigma[i][10]], m[sigma[i][11]], 5);
+        B2S_G( i, 2, 7,  8, 13, m[sigma[i][12]], m[sigma[i][13]], 6);
+        B2S_G( i, 3, 4,  9, 14, m[sigma[i][14]], m[sigma[i][15]], 7);
     }
 
     for( i = 0; i < 8; ++i )

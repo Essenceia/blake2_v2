@@ -17,7 +17,8 @@ module blake2 #(
 	parameter R2     = 24,
 	parameter R3     = 16,
 	parameter R4     = 63,
-	parameter R      = 4'd12, // 4'b1100 number of rounds in v srambling
+	parameter R      = 12, // Number of rounds in v srambling
+	localparam [3:0] R_LAST = R-1,
 	localparam BB_CLOG2   = $clog2(BB),
 	localparam W_CLOG2    = $clog2(W),
 	localparam W_CLOG2_P1 = $clog2((W+1)) // double paranthesis needed: verilator parsing bug
@@ -37,7 +38,7 @@ module blake2 #(
 	input [BB_CLOG2-1:0]  data_idx_i,	
 	input [7:0]         data_i,
 	
-	output       finished_o,
+	output       h_v_o,
 	output [7:0] h_o
 	);
 	localparam IB_CNT_W = BB - $clog2(BB);
@@ -52,6 +53,7 @@ module blake2 #(
 	wire [W-1:0] v_init_2[15:0];
 	wire [W-1:0] v_current[15:0];
 	reg  [W-1:0] v_q[15:0];
+
 	wire [W-1:0] h_last[7:0];
 	wire [W*8-1:0] h_flat;
 	wire [W*8-1:0] h_shift_next;
@@ -154,7 +156,7 @@ module blake2 #(
 			default: {round_q, g_idx_q} <= '0;
 		endcase
 	end
-	assign f_finished = {round_q, g_idx_q} == { R , 3'd7};
+	assign f_finished = {round_q, g_idx_q} == { R_LAST, 3'd7};
 
 	reg unused_block_idx_q;	
 	always @(posedge clk) begin
@@ -213,7 +215,10 @@ module blake2 #(
 	// IF f = TRUE THEN                // last block flag?
 	// |   v[14] := v[14] ^ 0xFF..FF   // Invert all bits.
 	// END IF.
-	wire [W-1:0] debug_v12, debug_v13, debug_v14;
+	wire [W-1:0] debug_v12, debug_v13, debug_v14, debug_v1, debug_v5, debug_v9;
+	assign debug_v1 = v_init_2[1];
+	assign debug_v5 = v_init_2[5];
+	assign debug_v9 = v_init_2[9];
 	assign debug_v12 = v_init_2[12];
 	assign debug_v13 = v_init_2[13];
 	assign debug_v14 = v_init_2[14];
@@ -319,7 +324,7 @@ module blake2 #(
 	always @(*) begin
 		case(g_idx_q)
 			0: {g_x_idx, g_y_idx} = {sigma_row_elems[0], sigma_row_elems[1]};
-			1: {g_x_idx, g_y_idx} = {sigma_row_elems[2], sigma_row_elems[2]};
+			1: {g_x_idx, g_y_idx} = {sigma_row_elems[2], sigma_row_elems[3]};
 			2: {g_x_idx, g_y_idx} = {sigma_row_elems[4], sigma_row_elems[5]};
 			3: {g_x_idx, g_y_idx} = {sigma_row_elems[6], sigma_row_elems[7]};
 			4: {g_x_idx, g_y_idx} = {sigma_row_elems[8], sigma_row_elems[9]};
@@ -426,10 +431,13 @@ module blake2 #(
 
 
 	// output streaming
-	reg [7:0] h_o_q;
-	always @(posedge clk)
-		h_o_q <= h_q[0][7:0];
-	assign h_o = h_o_q;
-	assign finished_o = (fsm_q == S_RES);
+	reg [7:0] res_q;
+	reg       res_v_q;
+	always @(posedge clk) begin
+		res_q <= h_q[0][7:0];
+		res_v_q <= (fsm_q == S_RES);
+	end
+	assign h_v_o = res_v_q;
+	assign h_o = res_q;
 
 endmodule

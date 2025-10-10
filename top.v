@@ -10,7 +10,7 @@ module top(
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 ); 
-	wire hash_finished;
+	wire hash_v;
 	wire [7:0] hash;
 	
 	wire [5:0] kk,nn;
@@ -33,10 +33,10 @@ module top(
 		.valid_i(uio_in[0]),
 		.cmd_i(uio_in[2:1]),
 		.data_i(ui_in),
-		.hash_finished_o(uio_out[3]),
+		.hash_v_o(uio_out[3]),
 		.hash_o(uo_out),
 	
-		.hash_finished_i(hash_finished),
+		.hash_v_i(hash_v),
 		.hash_i(hash),
 
 		.kk_o(kk),
@@ -66,7 +66,7 @@ module top(
 		.data_idx_i(data_idx),
 
 
-		.finished_o(hash_finished),
+		.h_v_o(hash_v),
 		.h_o(hash)
 	);
 endmodule

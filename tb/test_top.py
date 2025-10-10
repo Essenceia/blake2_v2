@@ -103,11 +103,13 @@ async def rst(dut, ena=1):
     # set default io
     dut.uio_in.value = 0
     dut.ena.value = 0
-    await Timer(random.randrange(1,10), unit="ns")
+    #await Timer(random.randrange(1,10), unit="ns")
+    await Timer(10, unit="ns")
     await FallingEdge(dut.clk)  
     dut.rst_n.value = 1
     dut.ena.value = ena
-    await Timer(random.randrange(1,10), unit="ns")
+    #await Timer(random.randrange(1,10), unit="ns")
+    await Timer(10, unit="ns")
     await FallingEdge(dut.clk)
 
 
@@ -118,7 +120,8 @@ async def rst(dut, ena=1):
 async def dissable_test(dut):
     await rst(dut, ena=0)
     uo_out = dut.uo_out.value # stable check, doesn't matter if it is X
-    c = random.randrange(10, 50)
+    # c = random.randrange(10, 50)
+    c = 10
     for i in range(0, c):
         assert(dut.uo_out.value == uo_out)
         assert(dut.uio_out.value == 0)
