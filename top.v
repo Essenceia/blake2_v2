@@ -28,6 +28,7 @@ module top(
 	io_intf m_io_intf(
 		.clk(clk),
 		.nreset(rst_n),
+		.en_i(ena),
 
 		.valid_i(uio_in[0]),
 		.cmd_i(uio_in[2:1]),

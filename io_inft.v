@@ -122,8 +122,8 @@ module io_intf(
 	// I/O
 	input wire clk, 
 	input wire nreset,
+	input wire en_i, 
 	
-	input wire       en_i, 
 	input wire       valid_i,
 	input wire [1:0] cmd_i,
 	input wire [7:0] data_i,
@@ -155,7 +155,7 @@ module io_intf(
 	wire valid; 
 	always @(posedge clk) 
 		en_q <= en_i;
-	assign valid_i = en_q & valid_i;
+	assign valid = en_q & valid_i;
 
 	byte_size_config m_config(
 		.clk(clk),

@@ -102,6 +102,7 @@ async def rst_test(dut):
     # set default io
     dut.ui_in.value = 0
     dut.uio_in.value = 0
+    dut.ena.value = 0
     await Timer(4, unit="ns")  # wait a bit
     await FallingEdge(dut.clk)  # wait for falling edge/"negedge"
     dut.rst_n.value = 1
