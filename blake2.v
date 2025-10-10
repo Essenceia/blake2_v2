@@ -187,7 +187,8 @@ module blake2 #(
 	// Parameter block p[0]
 	// h[0] := h[0] ^ 0x01010000 ^ (kk << 8) ^ nn
 	assign h_init[0] = IV[0] ^ {{W-32{1'b0}},32'h01010000} ^ {{W-W_CLOG2_P1-8{1'b0}},  kk_i ,{8{1'b0}}} ^ {{W-W_CLOG2_P1{1'b0}} , nn_i};
-	
+	wire [W-1:0] debug_h_init0; 
+	assign debug_h_init0 = h_init[0];	
 
 	//----------
 	//
@@ -341,10 +342,12 @@ module blake2 #(
 		.d_o(d)
 	);
 
+	reg [W-1:0] debug_v_q0;
 	always @(posedge clk) begin
 		if (fsm_q == S_F) begin
 			if ((g_idx_q == 'd0) | (g_idx_q == 'd4))
 				v_q[0] <= a;
+				debug_v_q0 <= a;
 			if ((g_idx_q == 'd1) | (g_idx_q == 'd5))
 				v_q[1] <= a;	
 			if ((g_idx_q == 'd2) | (g_idx_q == 'd6))

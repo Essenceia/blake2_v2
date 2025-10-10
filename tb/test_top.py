@@ -5,7 +5,8 @@ import math
 import hashlib
 import random 
 
-BB=64 
+BB=64
+
 
 def get_cmd(valid=True, conf=False, start=False, data=False, last=False):
     check = [conf, start, data, last]
