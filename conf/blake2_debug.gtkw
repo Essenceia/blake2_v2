@@ -1,0 +1,33 @@
+[*]
+[*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
+[*] Fri Oct 10 16:50:07 2025
+[*]
+[dumpfile] "/home/pitchu/rtl/blake2/tb/sim_build/top.fst"
+[dumpfile_mtime] "Fri Oct 10 16:10:33 2025"
+[dumpfile_size] 27460
+[savefile] "/home/pitchu/rtl/blake2/conf/blake2_debug.gtkw"
+[timestart] 164590
+[size] 1910 470
+[pos] -1281 -1
+*-13.279284 187480 59001 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.m_blake2.
+[treeopen] top.m_blake2.m_hash256.
+[sst_width] 290
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 111
+@28
+top.m_blake2.m_hash256.clk
+@800022
+#{s} (2)top.m_blake2.m_hash256.fsm_q[2:0] (1)top.m_blake2.m_hash256.fsm_q[2:0] (0)top.m_blake2.m_hash256.fsm_q[2:0] (2)top.m_blake2.m_hash256.g_idx_q[2:0] (1)top.m_blake2.m_hash256.g_idx_q[2:0] (0)top.m_blake2.m_hash256.g_idx_q[2:0] (3)top.m_blake2.m_hash256.round_q[3:0] (2)top.m_blake2.m_hash256.round_q[3:0] (1)top.m_blake2.m_hash256.round_q[3:0] (0)top.m_blake2.m_hash256.round_q[3:0]
+@24
+top.m_blake2.m_hash256.round_q[3:0]
+top.m_blake2.m_hash256.g_idx_q[2:0]
+top.m_blake2.m_hash256.fsm_q[2:0]
+@1001200
+-group_end
+@23
+top.m_blake2.m_hash256.m_q[511:0]
+[pattern_trace] 1
+[pattern_trace] 0
