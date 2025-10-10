@@ -110,6 +110,7 @@ module blake2 #(
 	reg [2:0] fsm_q;
 	wire f_finished;
 	reg [W_CLOG2_P1-1:0] res_cnt_q;
+	wire [W_CLOG2_P1-1:0] res_cnt_add;
 
 	localparam S_IDLE = 3'd0;
 	localparam S_WAIT_DATA = 3'd1;
@@ -126,7 +127,7 @@ module blake2 #(
 				S_WAIT_DATA: fsm_q <= (data_v_i & (data_idx_i == 6'd63))? S_F : S_WAIT_DATA;
 				S_F: fsm_q <= f_finished ? S_F_END : S_F;
 				S_F_END: fsm_q <= last_block_q ? S_RES : S_WAIT_DATA;
-				S_RES: fsm_q <= res_cnt_q == nn_i ? S_IDLE: S_RES;
+				S_RES: fsm_q <= res_cnt_add == nn_i ? S_IDLE: S_RES;
 				default : fsm_q <= S_IDLE; 
 			endcase
 		end
@@ -166,10 +167,11 @@ module blake2 #(
 			{unused_block_idx_q, block_idx_q} <= block_idx_q + {{IB_CNT_W-1{1'b0}},1'd1};
 	end
 
-	reg unused_res_cnt_q;
+	wire unused_res_cnt_add;
+	assign {unused_res_cnt_add, res_cnt_add} = res_cnt_q + 'd1;
 	always @(posedge clk) begin
 		case(fsm_q)
-			S_RES: {unused_res_cnt_q, res_cnt_q} <= res_cnt_q + 'd1;
+			S_RES: res_cnt_q <= res_cnt_add;
 			default: res_cnt_q <= '0;
 		endcase
 	end
