@@ -1,5 +1,5 @@
 # defaults
-SIM ?= cvc
+SIM ?= icarus
 WAVES=1
 TOPLEVEL_LANG ?= verilog
 

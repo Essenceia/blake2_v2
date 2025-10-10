@@ -90,23 +90,39 @@ async def test_random_hash(dut):
     await write_config(dut, kk, nn , ll)
     await Timer(2, unit="ns")
     await send_data_to_hash(dut, b'', data)
- 
-@cocotb.test()
-async def rst_test(dut):
-    """Try accessing the design."""
-    # set reset 
+
+async def rst(dut, ena=1):
     dut.rst_n.value = 0
-    cocotb.start_soon(generate_clock(dut))  # run the clock "in the background"
-    
+    cocotb.start_soon(generate_clock(dut))  # run the clock "in the background" 
     await Timer(4, unit="ns")
     # set default io
-    dut.ui_in.value = 0
     dut.uio_in.value = 0
     dut.ena.value = 0
-    await Timer(4, unit="ns")  # wait a bit
-    await FallingEdge(dut.clk)  # wait for falling edge/"negedge"
+    await Timer(random.randrange(1,10), unit="ns")
+    await FallingEdge(dut.clk)  
     dut.rst_n.value = 1
-    cocotb.log.info("rst_n is %s", dut.rst_n.value)
+    dut.ena.value = ena
+    await Timer(random.randrange(1,10), unit="ns")
+    await FallingEdge(dut.clk)
+
+
+
+# check internal signals are not toogling when slice is dissabled
+# used to reduce dynamic power usage
+@cocotb.test()
+async def dissable_test(dut):
+    await rst(dut, ena=0)
+    uo_out = dut.uo_out.value # stable check, doesn't matter if it is X
+    c = random.randrange(10, 50)
+    for i in range(0, c):
+        assert(dut.uo_out.value == uo_out)
+        assert(dut.uio_out.value == 0)
+        Timer(2, unit="ns")
+    
+@cocotb.test()
+async def hash_test(dut):
+    await rst(dut)
+    dut.ena.value = 1
     await Timer(4, unit="ns")
     await test_random_hash(dut)
     await Timer(250, unit="ns")
