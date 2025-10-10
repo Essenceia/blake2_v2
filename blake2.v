@@ -213,6 +213,11 @@ module blake2 #(
 	// IF f = TRUE THEN                // last block flag?
 	// |   v[14] := v[14] ^ 0xFF..FF   // Invert all bits.
 	// END IF.
+	wire [W-1:0] debug_v12, debug_v13, debug_v14;
+	assign debug_v12 = v_init_2[12];
+	assign debug_v13 = v_init_2[13];
+	assign debug_v14 = v_init_2[14];
+
 	assign v_init_2[12] = v_init[12] ^ t[W-1:0]; // Low word of the offset
 	assign v_init_2[13] = v_init[13] ^ t[2*W-1:W];// High word of the offset
 	assign v_init_2[14] = v_init[14] ^ {W{last_block_q}};
@@ -323,6 +328,9 @@ module blake2 #(
 			7: {g_x_idx, g_y_idx} = {sigma_row_elems[14], sigma_row_elems[15]};
 		endcase
 	end
+	wire [W-1:0] debug_m0, debug_m1;
+	assign debug_m0 = m_matrix[0];
+	assign debug_m1 = m_matrix[1];
 	assign g_x = m_matrix[g_x_idx];
 	assign g_y = m_matrix[g_y_idx];
 	

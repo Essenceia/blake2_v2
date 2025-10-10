@@ -20,6 +20,7 @@
 // Mixing function G.
 
 #define B2S_G(a, b, c, d, x, y) {   \
+	printf("G(a: 0x%08X, b: 0x%08X, c: 0x%08X, d: 0x%08X, x: 0x%08X, y: 0x%08X)\n", a, b, c, d, (x), (y));\
     v[a] = v[a] + v[b] + x;         \
     v[d] = ROTR32(v[d] ^ v[a], 16); \
     v[c] = v[c] + v[d];             \
@@ -66,8 +67,12 @@ static void blake2s_compress(blake2s_ctx *ctx, int last)
     if (last)                           // last block flag set ?
         v[14] = ~v[14];
 
-    for (i = 0; i < 16; i++)            // get little-endian words
+	printf("v[12] 0x%08X\nv[13] 0x%08X\nv[14] 0x%08X\n", v[12], v[13], v[14]);
+ 
+    for (i = 0; i < 16; i++){            // get little-endian words
         m[i] = B2S_GET32(&ctx->b[4 * i]);
+		printf("m[%02d] 0x%08X\n", i, m[i]);
+	}
 
     for (i = 0; i < 10; i++) {          // ten rounds
         B2S_G( 0, 4,  8, 12, m[sigma[i][ 0]], m[sigma[i][ 1]]);
