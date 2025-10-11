@@ -86,13 +86,14 @@ async def test_hash(dut, kk, nn, ll, key, data):
     await Timer(2, unit="ns")
     await send_data_to_hash(dut, key, data)
     await RisingEdge(dut.m_io.hash_v_o) 
+    await FallingEdge(dut.clk) 
     res = b''
     while (dut.m_io.hash_v_o.value == 1):
         x = dut.uo_out.value.to_unsigned()
         res = res + bytes([x])
         await Timer(2, unit="ns")
     cocotb.log.info("res 0x%s'", res.hex())
-    cocotb.log.info("%s %s",len(res.hex()),len(h.hexdigest()))
+    cocotb.log.debug("%s %s",len(res.hex()),len(h.hexdigest()))
     assert(len(res.hex()) == len(h.hexdigest())) 
     assert(res.hex() == h.hexdigest() ) 
 
@@ -145,5 +146,5 @@ async def hash_spec_test(dut):
 async def hash_test(dut):
     await rst(dut)
     await Timer(4, unit="ns")
-    await test_random_hash(dut)
-    #await send_data_to_hash(dut, b'\x01', b'\xbe\xef\xbe\xef')
+    for _ in range(0, 10):
+        await test_random_hash(dut)
