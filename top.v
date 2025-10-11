@@ -25,7 +25,7 @@ module top(
 	assign uio_out[7:4] = 4'd0;
 	assign uio_out[2:0] = 3'd0;
 
-	io_intf m_io_intf(
+	io_intf m_io(
 		.clk(clk),
 		.nreset(rst_n),
 		.en_i(ena),

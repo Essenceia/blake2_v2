@@ -1,5 +1,5 @@
 import cocotb
-from cocotb.triggers import FallingEdge, Timer
+from cocotb.triggers import FallingEdge, RisingEdge, Timer
 import logging
 import math 
 import hashlib
@@ -80,13 +80,21 @@ async def send_data_to_hash(dut, key=b'', data=b''):
 
 async def test_hash(dut, kk, nn, ll, key, data):
     h = hashlib.blake2s(data, digest_size=nn, key=key)
-    cocotb.log.info("data(%s): %s", ll, data.hex())
-    cocotb.log.info("hash(%s): %s", nn, h.hexdigest())
+    cocotb.log.info("data(%s): 0x%s", ll, data.hex())
+    cocotb.log.info("hash(%s): 0x%s", nn, h.hexdigest())
     await write_config(dut, kk, nn , ll)
     await Timer(2, unit="ns")
     await send_data_to_hash(dut, key, data)
-    await Timer(250, unit="ns")
-   
+    await RisingEdge(dut.m_io.hash_v_o) 
+    res = b''
+    while (dut.m_io.hash_v_o.value == 1):
+        x = dut.uo_out.value.to_unsigned()
+        res = res + bytes([x])
+        await Timer(2, unit="ns")
+    cocotb.log.info("res 0x%s'", res.hex())
+    cocotb.log.info("%s %s",len(res.hex()),len(h.hexdigest()))
+    assert(len(res.hex()) == len(h.hexdigest())) 
+    assert(res.hex() == h.hexdigest() ) 
 
 async def test_random_hash(dut):
     ll = random.randrange(65)
