@@ -42,20 +42,19 @@ async def write_config(dut, kk, nn, ll):
 
 async def write_data_in(dut, block=b'', start=False, last=False):
     assert(len(block) == BB )
-    cocotb.log.info("write data start %s last %s", start, last)
-    #todo add ready signal
+    cocotb.log.debug("write data start %s last %s", start, last)
     dut.uio_in.value = 0
-    cocotb.log.info("ready %s",dut.m_io.ready_v_o)
-    if(int(dut.m_io.ready_v_o) == 0):
+    cocotb.log.debug("ready %s",dut.m_io.ready_v_o)
+    if(int(dut.m_io.ready_v_o.value) == 0):
         await RisingEdge(dut.m_io.ready_v_o)
-    cocotb.log.info("detect rising edge on ready %s",dut.m_io.ready_v_o)
+    cocotb.log.debug("detect rising edge on ready %s",dut.m_io.ready_v_o)
      
     for i in range(0,BB):
         dut.uio_in.value = get_cmd(data=True)
         if (i == 0) and start: 
             dut.uio_in.value = get_cmd(start=True)
         if (i == BB - 1) and last:
-            cocotb.log.info("last") 
+            cocotb.log.debug("last") 
             dut.uio_in.value = get_cmd(last=True)
         dut.ui_in.value = block[i]
         await Timer(2, unit="ns")
@@ -80,7 +79,6 @@ async def send_data_to_hash(dut, key=b'', data=b''):
     padded_data = data.ljust(padded_size, b'\x00')
     for i in range(0, block_count):
         if ( i == block_count - 1): 
-            cocotb.log.info("blocks %d, i %d ", block_count, i)
             last=True
         await write_data_in(dut, padded_data[i*BB:((i+1)*BB)], start, last)
         start = False
@@ -92,7 +90,7 @@ async def test_hash(dut, kk, nn, ll, key, data):
     await write_config(dut, kk, nn , ll)
     await Timer(2, unit="ns")
     await send_data_to_hash(dut, key, data)
-    cocotb.log.info("waiting for hash v to rise")
+    cocotb.log.debug("waiting for hash v to rise")
     await RisingEdge(dut.m_io.hash_v_o) 
     await FallingEdge(dut.clk) 
     res = b''
@@ -150,10 +148,10 @@ async def dissable_test(dut):
 async def hash_spec_test(dut):
     await rst(dut)
     await test_hash(dut, 0, 32, 3, b'', b"abc")
-
+    await test_hash(dut, 0, 32, 67, b'', b"abc0000000000000000000000000000000000000000000000000000000000000000")
 @cocotb.test()
 async def hash_test(dut):
     await rst(dut)
     await Timer(4, unit="ns")
-    for _ in range(0, 2):
+    for _ in range(0, 3):
         await test_random_hash(dut)
