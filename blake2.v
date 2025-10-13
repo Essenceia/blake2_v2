@@ -9,8 +9,6 @@
 module blake2 #(	
 	parameter W      = 64, 
 	parameter BB     = W*2,
-	parameter LL_b   = { {(W*2)-8{1'b0}}, 8'b10000000},
-	parameter F_b    = 1'b1, // final block flag
 	parameter R1     = 32, // rotation bits, used in G
 	parameter R2     = 24,
 	parameter R3     = 16,
@@ -104,18 +102,20 @@ module blake2 #(
 	endgenerate
 
 	// fsm
+
+	typedef enum reg [2:0] {
+		S_IDLE = 3'd0,
+	    S_WAIT_DATA = 3'd1,
+	    S_F = 3'd2,
+	    S_F_END = 3'd3, // write back h, save on mux on path to write back v to h
+	    S_RES = 3'd4 } e_fsm;
+
 	reg first_block_q; 
 	reg last_block_q; 
-	reg [2:0] fsm_q;
+	e_fsm fsm_q;
 	wire f_finished;
 	reg [W_CLOG2_P1-1:0] res_cnt_q;
 	wire [W_CLOG2_P1-1:0] res_cnt_add;
-
-	localparam S_IDLE = 3'd0;
-	localparam S_WAIT_DATA = 3'd1;
-	localparam S_F = 3'd2;
-	localparam S_F_END = 3'd3; // write back h, save on mux on path to write back v to h
-	localparam S_RES = 3'd4;
 
 	always @(posedge clk) begin
 		if (~nreset) begin

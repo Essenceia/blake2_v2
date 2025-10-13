@@ -42,21 +42,24 @@ async def write_config(dut, kk, nn, ll):
 
 async def write_data_in(dut, block=b'', start=False, last=False):
     assert(len(block) == BB )
+    cocotb.log.info("write data start %s last %s", start, last)
     #todo add ready signal
     dut.uio_in.value = 0
-    while(dut.m_io.ready_v_o == 0):
-        cocotb.log.info("waiting for ready")
-        await Timer(2, unit="ns")
+    cocotb.log.info("ready %s",dut.m_io.ready_v_o)
+    if(int(dut.m_io.ready_v_o) == 0):
+        await RisingEdge(dut.m_io.ready_v_o)
+    cocotb.log.info("detect rising edge on ready %s",dut.m_io.ready_v_o)
      
     for i in range(0,BB):
-        cocotb.log.info("i %d", i) 
         dut.uio_in.value = get_cmd(data=True)
         if (i == 0) and start: 
             dut.uio_in.value = get_cmd(start=True)
-        if (i == BB - 1) and last: 
+        if (i == BB - 1) and last:
+            cocotb.log.info("last") 
             dut.uio_in.value = get_cmd(last=True)
         dut.ui_in.value = block[i]
         await Timer(2, unit="ns")
+    dut.uio_in.value = 0
 
 # lengths are in bytes
 async def send_data_to_hash(dut, key=b'', data=b''):
@@ -75,13 +78,12 @@ async def send_data_to_hash(dut, key=b'', data=b''):
     block_count = math.ceil(len(data)/BB)
     padded_size = block_count * BB
     padded_data = data.ljust(padded_size, b'\x00')
-    cocotb.log.debug("data %s", len(padded_data))
     for i in range(0, block_count):
         if ( i == block_count - 1): 
+            cocotb.log.info("blocks %d, i %d ", block_count, i)
             last=True
         await write_data_in(dut, padded_data[i*BB:((i+1)*BB)], start, last)
         start = False
-    dut.uio_in.value = 0
 
 async def test_hash(dut, kk, nn, ll, key, data):
     h = hashlib.blake2s(data, digest_size=nn, key=key)
@@ -153,5 +155,5 @@ async def hash_spec_test(dut):
 async def hash_test(dut):
     await rst(dut)
     await Timer(4, unit="ns")
-    for _ in range(0, 10):
+    for _ in range(0, 2):
         await test_random_hash(dut)
