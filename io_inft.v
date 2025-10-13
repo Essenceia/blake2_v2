@@ -128,10 +128,12 @@ module io_intf(
 	input wire [1:0] cmd_i,
 	input wire [7:0] data_i,
 
-	output wire hash_v_o,
+	output wire       ready_v_o,
+	output wire       hash_v_o,
 	output wire [7:0] hash_o,
 
 	// inner
+	input wire       ready_v_i,
 	input wire       hash_v_i,
 	input wire [7:0] hash_i,
 
@@ -183,6 +185,7 @@ module io_intf(
 	 	.block_last_o(block_last_o)
 	);
 
+	assign ready_v_o = ready_v_i & ~data_v_o;
 	assign hash_v_o = hash_v_i;
 	assign hash_o = hash_i;
 endmodule

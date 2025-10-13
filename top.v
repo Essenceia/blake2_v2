@@ -10,7 +10,8 @@ module top(
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 ); 
-	wire hash_v;
+	wire       ready_v;
+	wire       hash_v;
 	wire [7:0] hash;
 	
 	wire [5:0] kk,nn;
@@ -21,8 +22,8 @@ module top(
 	wire [5:0] data_idx; 
 	wire block_first, block_last; 
 
-	assign uio_oe = 8'b0000_1000;
-	assign uio_out[7:4] = 4'd0;
+	assign uio_oe = 8'b0001_1000;
+	assign uio_out[7:5] = 3'd0;
 	assign uio_out[2:0] = 3'd0;
 
 	io_intf m_io(
@@ -33,9 +34,12 @@ module top(
 		.valid_i(uio_in[0]),
 		.cmd_i(uio_in[2:1]),
 		.data_i(ui_in),
+
+		.ready_v_o(uio_out[4]),
 		.hash_v_o(uio_out[3]),
 		.hash_o(uo_out),
-	
+
+		.ready_v_i(ready_v),	
 		.hash_v_i(hash_v),
 		.hash_i(hash),
 
@@ -65,6 +69,7 @@ module top(
 		.data_i(data),
 		.data_idx_i(data_idx),
 
+		.ready_v_o(ready_v),
 
 		.h_v_o(hash_v),
 		.h_o(hash)

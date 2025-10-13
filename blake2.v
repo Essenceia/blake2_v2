@@ -7,8 +7,6 @@
 // Main blake2 module
 // default parameter configuration is for blake2b
 module blake2 #(	
-	parameter NN_b   = 8'b0100_0000, // hash size in binary, hash-512 : 8'b0100_0000, hash-256 : 8'b0010_0000
-	parameter NN_b_l = 8, // NN_b bit length
 	parameter W      = 64, 
 	parameter BB     = W*2,
 	parameter LL_b   = { {(W*2)-8{1'b0}}, 8'b10000000},
@@ -27,19 +25,20 @@ module blake2 #(
 	input               clk,
 	input               nreset,
 
-	input [W_CLOG2_P1-1:0]         kk_i,
-	input [W_CLOG2_P1-1:0]         nn_i,
-	input [BB-1:0]      ll_i,
+	input [W_CLOG2_P1-1:0] kk_i,
+	input [W_CLOG2_P1-1:0] nn_i,
+	input [BB-1:0]         ll_i,
 
-	input wire          block_first_i,               
-	input wire          block_last_i,               
+	input wire             block_first_i,               
+	input wire             block_last_i,               
 	
-	input               data_v_i,
-	input [BB_CLOG2-1:0]  data_idx_i,	
-	input [7:0]         data_i,
-	
-	output       h_v_o,
-	output [7:0] h_o
+	input                  data_v_i,
+	input [BB_CLOG2-1:0]   data_idx_i,	
+	input [7:0]            data_i,
+
+	output                 ready_v_o,	
+	output                 h_v_o,
+	output [7:0]           h_o
 	);
 	localparam IB_CNT_W = BB - $clog2(BB);
 	 
@@ -362,6 +361,7 @@ module blake2 #(
 		if (fsm_q == S_F) begin
 			if ((g_idx_q == 'd0) | (g_idx_q == 'd4))
 				v_q[0] <= a;
+			if ((g_idx_q == 'd0) | (g_idx_q == 'd4))
 				debug_v_q0 <= a;
 			if ((g_idx_q == 'd1) | (g_idx_q == 'd5))
 				v_q[1] <= a;	
@@ -430,9 +430,12 @@ module blake2 #(
 
 	assign h_shift_next = {8'b0, h_flat[W*8-1:8]};
 
+	// output 
+	
+	// ready 
+	assign ready_v_o = ((fsm_q == S_WAIT_DATA) | (fsm_q == S_IDLE));	
 
-
-	// output streaming
+	// hash finished result streaming
 	reg [7:0] res_q;
 	reg       res_v_q;
 	always @(posedge clk) begin

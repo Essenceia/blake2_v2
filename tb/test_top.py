@@ -41,10 +41,15 @@ async def write_config(dut, kk, nn, ll):
     dut.uio_in.value = 0
 
 async def write_data_in(dut, block=b'', start=False, last=False):
-    cocotb.log.info("block len %s", len(block))
     assert(len(block) == BB )
-    #todo add ready signal 
-    for i in range(0,BB): 
+    #todo add ready signal
+    dut.uio_in.value = 0
+    while(dut.m_io.ready_v_o == 0):
+        cocotb.log.info("waiting for ready")
+        await Timer(2, unit="ns")
+     
+    for i in range(0,BB):
+        cocotb.log.info("i %d", i) 
         dut.uio_in.value = get_cmd(data=True)
         if (i == 0) and start: 
             dut.uio_in.value = get_cmd(start=True)
@@ -85,6 +90,7 @@ async def test_hash(dut, kk, nn, ll, key, data):
     await write_config(dut, kk, nn , ll)
     await Timer(2, unit="ns")
     await send_data_to_hash(dut, key, data)
+    cocotb.log.info("waiting for hash v to rise")
     await RisingEdge(dut.m_io.hash_v_o) 
     await FallingEdge(dut.clk) 
     res = b''
@@ -98,7 +104,7 @@ async def test_hash(dut, kk, nn, ll, key, data):
     assert(res.hex() == h.hexdigest() ) 
 
 async def test_random_hash(dut):
-    ll = random.randrange(65)
+    ll = random.randrange(1,129)
     nn = random.randrange(1,33)
     kk=0
     key = random.randbytes(kk)
@@ -133,7 +139,8 @@ async def dissable_test(dut):
     c = 10
     for i in range(0, c):
         assert(dut.uo_out.value == uo_out)
-        assert(dut.uio_out.value == 0)
+        # mask ready
+        assert(int(dut.uio_out.value) & 0xEF == 0)
         Timer(2, unit="ns")
    
 # blake2 spec, appandix C blake2s test vector

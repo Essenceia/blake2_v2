@@ -54,12 +54,12 @@ module blake2s_hash256(
 	input        data_v_i,
 	input [5:0]  data_idx_i,	
 	input [7:0]  data_i,
-	
+
+	output       ready_v_o,	
 	output       h_v_o,
 	output [7:0] h_o
 	);
 	blake2 #( 
-		.NN_b(8'b0010_0000),
 		.W(32),
 		.R1(16),
 		.R2(12),
@@ -81,6 +81,7 @@ module blake2s_hash256(
 		.data_idx_i(data_idx_i),
 		.data_i(data_i),
 		
+		.ready_v_o(ready_v_o),
 		.h_v_o(h_v_o),
 		.h_o(h_o)
 	);
