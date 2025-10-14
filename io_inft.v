@@ -85,7 +85,7 @@ module block_data(
 		if (~nreset | conf_v) begin
 			cnt_q <= '0;
 		end else begin
-			{unused_cnt_q, cnt_q} <= cnt_q + {5'b0, data_v_q};
+			{unused_cnt_q, cnt_q} <= cnt_q + {5'b0, data_v};
 		end
 	end
 
@@ -99,7 +99,7 @@ module block_data(
 	end
 
 	always @(posedge clk) begin
-		if ((~nreset) | ((cnt_q == 6'd0) & data_v_q))
+		if ((~nreset) | ((cnt_q == 6'd0) & data_v & ~start_v))
 				start_q <= '0;
 		else if (start_v)
 			start_q <= start_v;
@@ -107,17 +107,17 @@ module block_data(
 
 
 	always @(posedge clk) begin
-		if ((~nreset) | ((cnt_q == 6'd0) & data_v_q))
+		if ((~nreset) | ((cnt_q == 6'd0) & data_v & ~last_v))
 				last_q <= '0;
 		else if (last_v)
 			last_q <= last_v;
 	end
 
-	assign data_v_o = data_v_q;
-	assign data_o = data_q;
-	assign data_idx_o = cnt_q;
+	assign data_v_o      = data_v_q;
+	assign data_o        = data_q;
+	assign data_idx_o    = cnt_q;
 	assign block_first_o = start_q;
-	assign block_last_o = last_q; 
+	assign block_last_o  = last_q; 
 endmodule
 
 module io_intf(
