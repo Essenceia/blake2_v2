@@ -69,7 +69,7 @@ async def send_data_to_hash(dut, key=b'', data=b''):
 
     assert(len(data) > 0) 
     if len(key) > 0:
-        assert (len(key) <= BB/32)
+        assert (len(key) <= BB/2)
         tmp = key.ljust(BB, b'\x00')
         cocotb.log.debug("key %s", len(tmp))
         await write_data_in(dut, tmp, start, False) 
@@ -86,7 +86,10 @@ async def send_data_to_hash(dut, key=b'', data=b''):
 
 async def test_hash(dut, kk, nn, ll, key, data):
     h = hashlib.blake2s(data, digest_size=nn, key=key)
+    assert(kk == len(key))
+    assert(ll == len(data))
     cocotb.log.info("data[0:%s-1]: 0x%s", ll, data.hex())
+    cocotb.log.info("key [0:%s-1]: 0x%s", kk, key.hex())
     cocotb.log.info("hash[0:%s-1]: 0x%s", nn, h.hexdigest())
     await write_config(dut, kk, nn , ll)
     await Timer(2, unit="ns")
@@ -107,10 +110,10 @@ async def test_hash(dut, kk, nn, ll, key, data):
 async def test_random_hash(dut):
     ll = random.randrange(1,2500)
     nn = random.randrange(1,33)
-    kk=0
+    kk = random.randrange(1,33)
     key = random.randbytes(kk)
     data = random.randbytes(ll)
-    await test_hash(dut, kk, nn, ll, b'', data)
+    await test_hash(dut, kk, nn, ll, key, data)
 
 async def rst(dut, ena=1):
     dut.rst_n.value = 0
@@ -148,8 +151,13 @@ async def dissable_test(dut):
 @cocotb.test()
 async def hash_spec_test(dut):
     await rst(dut)
+    # single block
     await test_hash(dut, 0, 32, 3, b'', b"abc")
+    # stream mode, multiblock
     await test_hash(dut, 0, 32, 67, b'', b"abc0000000000000000000000000000000000000000000000000000000000000000")
+    # single block with key
+    await test_hash(dut, 1, 32, 3, b"a", b"abc")
+
 @cocotb.test()
 async def hash_test(dut):
     await rst(dut)
