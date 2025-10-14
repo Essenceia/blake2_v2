@@ -99,7 +99,7 @@ module block_data(
 	end
 
 	always @(posedge clk) begin
-		if ((~nreset) | (cnt_q == 6'd63))
+		if ((~nreset) | ((cnt_q == 6'd0) & data_v_q))
 				start_q <= '0;
 		else if (start_v)
 			start_q <= start_v;
@@ -107,7 +107,7 @@ module block_data(
 
 
 	always @(posedge clk) begin
-		if ((~nreset) | (cnt_q == 6'd63))
+		if ((~nreset) | ((cnt_q == 6'd0) & data_v_q))
 				last_q <= '0;
 		else if (last_v)
 			last_q <= last_v;

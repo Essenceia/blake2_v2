@@ -27,6 +27,12 @@ async def generate_clock(dut):
         dut.clk.value = 1
         await Timer(1, unit="ns")
 
+# dissable data transfert for "cycles" cycles
+async def invalid_data(dut, cycles):
+    for i in range(0, cycles):
+        dut.uio_in.value = 0
+        await Timer(2, unit="ns")
+
 async def write_config(dut, kk, nn, ll):
     dut.uio_in.value = 1 # valid 1, cmd = 0
     # kk (8b), nn (8b), ll (64b)
@@ -53,6 +59,8 @@ async def write_data_in(dut, block=b'', start=False, last=False):
     assert(int(dut.m_io.ready_v_o.value) == 1)
  
     for i in range(0,BB):
+        if (random.randrange(0,100) > 75):
+            await invalid_data(dut, random.randrange(1,5))
         dut.uio_in.value = get_cmd(data=True)
         if (i == 0) and start: 
             dut.uio_in.value = get_cmd(start=True)
