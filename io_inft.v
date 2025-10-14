@@ -89,8 +89,10 @@ module block_data(
 		end
 	end
 
-	always @(posedge clk) begin
+	always @(posedge clk)
 		data_v_q <= data_v;
+
+	always @(posedge clk) begin
 		if (data_v) begin
 			data_q <= data_i;
 		end

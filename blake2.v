@@ -44,7 +44,7 @@ module blake2 #(
 	reg  [3:0] round_q;
 
 	wire [BB-1:0]  t;	
-	reg  [IB_CNT_W-1:0]  block_idx_q;
+	reg  [IB_CNT_W-1:0]  block_idx_plus_one_q;
 
 	wire [W-1:0] v_init[15:0];
 	wire [W-1:0] v_init_2[15:0];
@@ -158,12 +158,12 @@ module blake2 #(
 	end
 	assign f_finished = {round_q, g_idx_q} == { R_LAST, 3'd7};
 
-	reg unused_block_idx_q;	
+	reg unused_block_idx_plus_one_q;	
 	always @(posedge clk) begin
 		if ( (fsm_q == S_IDLE) | (fsm_q == S_RES)) 
-			block_idx_q <= '0;
+			block_idx_plus_one_q <= {{IB_CNT_W-1{1'b0}}, 1'b1};
 		else 
-			{unused_block_idx_q, block_idx_q} <= block_idx_q + {{IB_CNT_W-1{1'b0}},1'd1};
+			{unused_block_idx_plus_one_q, block_idx_plus_one_q} <= block_idx_plus_one_q + {{IB_CNT_W-1{1'b0}},f_finished};
 	end
 
 	wire unused_res_cnt_add;
@@ -198,7 +198,7 @@ module blake2 #(
 	// Function F
 	//
 	// Calculate t, TODO block index increment
-	assign t = last_block_q ? ll_i: {block_idx_q, {BB_CLOG2{1'b0}}};
+	assign t = last_block_q ? ll_i: {block_idx_plus_one_q, {BB_CLOG2{1'b0}}};
 	//
 	// Initialize local work vector v[0..15]
 	// v[0..7]  := h[0..7]              // First half from state.

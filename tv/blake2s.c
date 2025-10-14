@@ -62,7 +62,9 @@ static void blake2s_compress(blake2s_ctx *ctx, int last)
         v[i] = ctx->h[i];
         v[i + 8] = blake2s_iv[i];
     }
-
+	
+	printf("t[31:00]: %08X (%d)\n", ctx->t[0], ctx->t[0]);
+	printf("t[63:32]: %08X (%d)\n", ctx->t[1], ctx->t[1]);
     v[12] ^= ctx->t[0];                 // low 32 bits of offset
     v[13] ^= ctx->t[1];                 // high 32 bits
     if (last)                           // last block flag set ?
@@ -77,8 +79,9 @@ static void blake2s_compress(blake2s_ctx *ctx, int last)
 
     for (i = 0; i < 10; i++) {          // ten rounds
 		printf("---------\n");
+		printf("m[s[0]]: %d/0x%08X, s[1]: %d/0x%08X\n", sigma[i][0], m[sigma[i][0]], sigma[i][1], m[sigma[i][1]]);
         B2S_G( i, 0, 4,  8, 12, m[sigma[i][ 0]], m[sigma[i][ 1]], 0);
-		printf("m[s[2]]: %d/0x%02X, s[3]: %d/0x%02X\n", sigma[i][2], m[sigma[i][2]], sigma[i][3], m[sigma[i][3]]);
+		printf("m[s[2]]: %d/0x%08X, s[3]: %d/0x%08X\n", sigma[i][2], m[sigma[i][2]], sigma[i][3], m[sigma[i][3]]);
         B2S_G( i, 1, 5,  9, 13, m[sigma[i][ 2]], m[sigma[i][ 3]], 1);
         B2S_G( i, 2, 6, 10, 14, m[sigma[i][ 4]], m[sigma[i][ 5]], 2);
         B2S_G( i, 3, 7, 11, 15, m[sigma[i][ 6]], m[sigma[i][ 7]], 3);

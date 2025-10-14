@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "blake2s.h" 
+#include <string.h> 
 
 // input vector size in bytes
-#define IN_SIZE (size_t) 3
+#define IN_SIZE (size_t) 67
 // output vector size in bytes
 #define OUT_SIZE (size_t) 32
 
@@ -11,6 +12,7 @@ int main(){
 	uint8_t d[IN_SIZE], o[OUT_SIZE];
 	
 	// generate new test vector
+	memset(d, '0', 67);
 	d[0] = 'a';
 	d[1] = 'b';
 	d[2] = 'c';	

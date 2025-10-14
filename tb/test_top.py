@@ -42,13 +42,13 @@ async def write_config(dut, kk, nn, ll):
 
 async def write_data_in(dut, block=b'', start=False, last=False):
     assert(len(block) == BB )
-    cocotb.log.debug("write data start %s last %s", start, last)
+    cocotb.log.info("block %s", block)
     dut.uio_in.value = 0
     cocotb.log.debug("ready %s",dut.m_io.ready_v_o)
     if(int(dut.m_io.ready_v_o.value) == 0):
         await RisingEdge(dut.m_io.ready_v_o)
-    cocotb.log.debug("detect rising edge on ready %s",dut.m_io.ready_v_o)
-     
+   # await Timer(1, unit="ns")
+ 
     for i in range(0,BB):
         dut.uio_in.value = get_cmd(data=True)
         if (i == 0) and start: 
@@ -85,8 +85,8 @@ async def send_data_to_hash(dut, key=b'', data=b''):
 
 async def test_hash(dut, kk, nn, ll, key, data):
     h = hashlib.blake2s(data, digest_size=nn, key=key)
-    cocotb.log.info("data(%s): 0x%s", ll, data.hex())
-    cocotb.log.info("hash(%s): 0x%s", nn, h.hexdigest())
+    cocotb.log.info("data[0:%s-1]: 0x%s", ll, data.hex())
+    cocotb.log.info("hash[0:%s-1]: 0x%s", nn, h.hexdigest())
     await write_config(dut, kk, nn , ll)
     await Timer(2, unit="ns")
     await send_data_to_hash(dut, key, data)
