@@ -16,7 +16,6 @@ module blake2 #(
 	parameter R      = 12, // Number of rounds in v srambling
 	localparam [3:0] R_LAST = R-1,
 	localparam BB_CLOG2   = $clog2(BB),
-	localparam W_CLOG2    = $clog2(W),
 	localparam W_CLOG2_P1 = $clog2((W+1)) // double paranthesis needed: verilator parsing bug
 	)
 	(
@@ -52,10 +51,13 @@ module blake2 #(
 	reg  [W-1:0] v_q[15:0];
 
 	wire [W-1:0] h_last[7:0];
-	wire [W*8-1:0] h_flat;
 	wire [W*8-1:0] h_shift_next;
 	wire [W-1:0] h_shift_next_matrix[7:0];
 	reg  [W-1:0] h_q[7:0];
+	/* verilator lint_off UNUSEDSIGNAL */
+	// bottom 8 bits expected to be unused
+	wire [W*8-1:0] h_flat;
+	/* verilator lint_on UNUSEDSIGNAL */
 	
 	reg  [W*16-1:0] m_q;
 	wire [W-1:0] m_matrix[15:0];

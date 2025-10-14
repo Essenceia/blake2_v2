@@ -14,17 +14,19 @@ module top(
 	wire       hash_v;
 	wire [7:0] hash;
 	
-	wire [5:0] kk,nn;
+	wire [5:0]  kk,nn;
 	wire [63:0] ll; 
 	
 	wire data_v; 
 	wire [7:0] data; 
 	wire [5:0] data_idx; 
-	wire block_first, block_last; 
+	wire block_first, block_last;
+	wire [4:0] unused_io; 
 
 	assign uio_oe = 8'b0001_1000;
 	assign uio_out[7:5] = 3'd0;
 	assign uio_out[2:0] = 3'd0;
+	assign unused_io = uio_in[7:3];
 
 	io_intf m_io(
 		.clk(clk),

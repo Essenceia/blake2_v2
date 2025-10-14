@@ -10,10 +10,12 @@ module byte_size_config(
 	output wire [63:0] ll_o
 ); 
 	// configuration
+	/* verilator lint_off UNUSEDPARAM */
 	parameter CFG_CNT_KK      = 4'd0;
 	parameter CFG_CNT_NN      = 4'd1;
 	parameter CFG_CNT_LL_MIN  = 4'd2;
 	parameter CFG_CNT_LL_MAX  = 4'd10;
+	/* verilator lint_on UNUSEDPARAM */
 
 	reg       unused_cfg_cnt_q;
 	reg [3:0]  cfg_cnt_q; 
@@ -59,10 +61,12 @@ module block_data(
 	output wire         block_first_o,
 	output wire         block_last_o
 );
+	/* verilator lint_off UNUSEDPARAM */
 	parameter CMD_CONF  = 2'd0;  
 	parameter CMD_START = 2'd1;
 	parameter CMD_DATA  = 2'd2;
 	parameter CMD_LAST  = 2'd3;
+	/* verilator lint_on UNUSEDPARAM */
 
 	reg       data_v_q;
 	reg [7:0] data_q;
