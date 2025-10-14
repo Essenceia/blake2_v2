@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Mon Oct 13 19:37:28 2025
+[*] Tue Oct 14 01:42:54 2025
 [*]
 [dumpfile] "/home/pitchu/rtl/blake2/tb/sim_build/top.fst"
-[dumpfile_mtime] "Mon Oct 13 19:21:24 2025"
-[dumpfile_size] 68445
+[dumpfile_mtime] "Tue Oct 14 01:42:08 2025"
+[dumpfile_size] 1758831
 [savefile] "/home/pitchu/rtl/blake2/conf/blake2_debug.gtkw"
-[timestart] 855920
+[timestart] 37040
 [size] 1910 470
 [pos] -1 -1
-*-12.279284 871790 59001 231880 233770 579900 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-13.279284 70001 59001 231880 233770 579900 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.m_blake2.
 [treeopen] top.m_io.
@@ -62,9 +62,7 @@ top.m_blake2.m_hash256.debug_v9[31:0]
 top.m_blake2.m_hash256.debug_v12[31:0]
 top.m_blake2.m_hash256.debug_v13[31:0]
 top.m_blake2.m_hash256.debug_v14[31:0]
-@23
 top.m_blake2.m_hash256.debug_m0[31:0]
-@22
 top.m_blake2.m_hash256.debug_m1[31:0]
 @24
 top.m_blake2.m_hash256.t[63:0]
@@ -160,21 +158,37 @@ top.m_blake2.m_hash256.h_v_o
 top.m_blake2.m_hash256.h_o[7:0]
 @1401200
 -group_end
-@c00022
+@800022
 [color] 7
 #{io} top.m_io.ready_v_o (1)top.m_io.m_block_data.cmd_i[1:0] (0)top.m_io.m_block_data.cmd_i[1:0] top.m_io.m_block_data.valid_i top.m_io.m_block_data.data_v (7)top.m_io.m_block_data.data_o[7:0] (6)top.m_io.m_block_data.data_o[7:0] (5)top.m_io.m_block_data.data_o[7:0] (4)top.m_io.m_block_data.data_o[7:0] (3)top.m_io.m_block_data.data_o[7:0] (2)top.m_io.m_block_data.data_o[7:0] (1)top.m_io.m_block_data.data_o[7:0] (0)top.m_io.m_block_data.data_o[7:0] top.m_io.m_block_data.data_v_o (5)top.m_io.m_block_data.cnt_q[5:0] (4)top.m_io.m_block_data.cnt_q[5:0] (3)top.m_io.m_block_data.cnt_q[5:0] (2)top.m_io.m_block_data.cnt_q[5:0] (1)top.m_io.m_block_data.cnt_q[5:0] (0)top.m_io.m_block_data.cnt_q[5:0]
+@28
+top.m_io.m_block_data.clk
+top.m_io.ready_v_o
 @24
 top.m_io.m_block_data.cnt_q[5:0]
-@28
+@29
 top.m_io.m_block_data.data_v_o
 @22
+[color] 7
 top.m_io.m_block_data.data_o[7:0]
 @28
 top.m_io.m_block_data.data_v
+top.m_io.m_block_data.data_v_q
+@800022
+#{i} (7)top.m_io.m_block_data.data_i[7:0] (6)top.m_io.m_block_data.data_i[7:0] (5)top.m_io.m_block_data.data_i[7:0] (4)top.m_io.m_block_data.data_i[7:0] (3)top.m_io.m_block_data.data_i[7:0] (2)top.m_io.m_block_data.data_i[7:0] (1)top.m_io.m_block_data.data_i[7:0] (0)top.m_io.m_block_data.data_i[7:0] (1)top.m_io.m_block_data.cmd_i[1:0] (0)top.m_io.m_block_data.cmd_i[1:0] top.m_io.m_block_data.valid_i
+@28
+[color] 3
 top.m_io.m_block_data.valid_i
 top.m_io.m_block_data.cmd_i[1:0]
-top.m_io.ready_v_o
-@1401200
+@22
+[color] 7
+top.m_io.m_block_data.data_i[7:0]
+@28
+top.m_io.m_block_data.data_v
+@1001200
 -group_end
+-group_end
+@22
+top.m_io.m_block_data.data_q[7:0]
 [pattern_trace] 1
 [pattern_trace] 0

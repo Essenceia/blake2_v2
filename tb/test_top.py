@@ -42,7 +42,7 @@ async def write_config(dut, kk, nn, ll):
 
 async def write_data_in(dut, block=b'', start=False, last=False):
     assert(len(block) == BB )
-    cocotb.log.info("block %s", block)
+    cocotb.log.debug("block %s", block)
     dut.uio_in.value = 0
     cocotb.log.debug("ready %s",dut.m_io.ready_v_o)
     if(int(dut.m_io.ready_v_o.value) == 0):
