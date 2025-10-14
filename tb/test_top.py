@@ -34,6 +34,8 @@ async def write_config(dut, kk, nn, ll):
     await Timer(2, unit="ns")
     dut.ui_in.value = nn
     await Timer(2, unit="ns")
+    if kk > 0:
+        ll = ll + BB
     for i in range(0,8):
         dut.ui_in.value = (ll >> 8*i) & 0xff
         cocotb.log.debug("writing ll %s",dut.ui_in.value)
