@@ -47,7 +47,8 @@ async def write_data_in(dut, block=b'', start=False, last=False):
     cocotb.log.debug("ready %s",dut.m_io.ready_v_o)
     if(int(dut.m_io.ready_v_o.value) == 0):
         await RisingEdge(dut.m_io.ready_v_o)
-   # await Timer(1, unit="ns")
+    await FallingEdge(dut.clk)
+    assert(int(dut.m_io.ready_v_o.value) == 1)
  
     for i in range(0,BB):
         dut.uio_in.value = get_cmd(data=True)
@@ -104,7 +105,7 @@ async def test_hash(dut, kk, nn, ll, key, data):
     assert(res.hex() == h.hexdigest() ) 
 
 async def test_random_hash(dut):
-    ll = random.randrange(1,129)
+    ll = random.randrange(1,2500)
     nn = random.randrange(1,33)
     kk=0
     key = random.randbytes(kk)
@@ -153,5 +154,5 @@ async def hash_spec_test(dut):
 async def hash_test(dut):
     await rst(dut)
     await Timer(4, unit="ns")
-    for _ in range(0, 3):
+    for _ in range(0, 10):
         await test_random_hash(dut)
