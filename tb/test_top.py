@@ -138,13 +138,11 @@ async def rst(dut, ena=1):
     # set default io
     dut.uio_in.value = 0
     dut.ena.value = 0
-    #await Timer(random.randrange(1,10), unit="ns")
-    await Timer(10, unit="ns")
+    await Timer(random.randrange(1,10), unit="ns")
     await FallingEdge(dut.clk)  
     dut.rst_n.value = 1
     dut.ena.value = ena
-    #await Timer(random.randrange(1,10), unit="ns")
-    await Timer(10, unit="ns")
+    await Timer(random.randrange(1,10), unit="ns")
     await FallingEdge(dut.clk)
 
 
