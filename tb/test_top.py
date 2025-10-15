@@ -176,5 +176,5 @@ async def hash_spec_test(dut):
 async def hash_test(dut):
     await rst(dut)
     await Timer(4, unit="ns")
-    for _ in range(0, 10):
+    for _ in range(0, 50):
         await test_random_hash(dut)
