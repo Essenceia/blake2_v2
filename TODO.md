@@ -3,5 +3,6 @@
     - [x] in data
     - [x] in config 
 - [ ] add 8/4 bit wide in/out data configuration, make 4 bit default: RP2040 PIO none consequtive bit limitation for the demo board
+- [ ] figure out how to send out data over consequtive cycles 
 - [ ] fpga emulation 
 - [ ] formal emultions
