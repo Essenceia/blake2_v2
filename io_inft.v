@@ -70,8 +70,9 @@ module block_data(
 
 	reg       data_v_q;
 	reg [7:0] data_q;
-	reg [5:0] cnt_q;
-	reg       unused_cnt_q;
+	reg [5:0] data_cnt_q;
+	reg [5:0] data_idx_q;
+	reg       unused_data_cnt_q;
 	wire      conf_v;
 	wire      data_v;
 	wire      start_v;
@@ -87,14 +88,16 @@ module block_data(
 
 	always @(posedge clk) begin
 		if (~nreset | conf_v) begin
-			cnt_q <= '0;
+			data_cnt_q <= '0;
 		end else begin
-			{unused_cnt_q, cnt_q} <= cnt_q + {5'b0, data_v};
+			{unused_data_cnt_q, data_cnt_q} <= data_cnt_q + {5'b0, data_v};
 		end
 	end
 
-	always @(posedge clk)
-		data_v_q <= data_v;
+	always @(posedge clk) begin
+		data_v_q   <= data_v;
+		data_idx_q <= data_cnt_q; // idx = cnt - 1, saving on added logic by capturing the unincremented version of cnt
+	end
 
 	always @(posedge clk) begin
 		if (data_v) begin
@@ -103,23 +106,23 @@ module block_data(
 	end
 
 	always @(posedge clk) begin
-		if ((~nreset) | ((cnt_q == 6'd0) & data_v & ~start_v))
-				start_q <= '0;
+		if ((~nreset) | ((data_cnt_q == 6'd0) & data_v & ~start_v))
+			start_q <= '0;
 		else if (start_v)
 			start_q <= start_v;
 	end
 
 
 	always @(posedge clk) begin
-		if ((~nreset) | ((cnt_q == 6'd0) & data_v & ~last_v))
-				last_q <= '0;
+		if ((~nreset) | ((data_cnt_q == 6'd0) & data_v & ~last_v))
+			last_q <= '0;
 		else if (last_v)
 			last_q <= last_v;
 	end
 
 	assign data_v_o      = data_v_q;
 	assign data_o        = data_q;
-	assign data_idx_o    = cnt_q;
+	assign data_idx_o    = data_idx_q;
 	assign block_first_o = start_q;
 	assign block_last_o  = last_q; 
 endmodule
