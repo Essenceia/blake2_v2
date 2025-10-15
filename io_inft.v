@@ -11,12 +11,12 @@ module byte_size_config(
 	output wire [63:0] ll_o
 ); 
 	// configuration
-	parameter CMD_CONF        = 2'd0;  
+	localparam CMD_CONF        = 2'd0;  
+	localparam CFG_CNT_KK      = 4'd0;
+	localparam CFG_CNT_NN      = 4'd1;
 	/* verilator lint_off UNUSEDPARAM */
-	parameter CFG_CNT_KK      = 4'd0;
-	parameter CFG_CNT_NN      = 4'd1;
-	parameter CFG_CNT_LL_MIN  = 4'd2;
-	parameter CFG_CNT_LL_MAX  = 4'd10;
+	localparam CFG_CNT_LL_MIN  = 4'd2;
+	localparam CFG_CNT_LL_MAX  = 4'd10;
 	/* verilator lint_on UNUSEDPARAM */
 
 	reg       unused_cfg_cnt_q;
@@ -33,7 +33,7 @@ module byte_size_config(
 		if ((~nreset) | config_n_v) begin
 			cfg_cnt_q <= '0;
 		end else begin
-			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + {2'b0, config_v};
+			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + {3'b0, config_v};
 		end
 	end
 
@@ -65,11 +65,11 @@ module block_data(
 	output wire         block_first_o,
 	output wire         block_last_o
 );
+	localparam CMD_CONF  = 2'd0;  
+	localparam CMD_START = 2'd1;
+	localparam CMD_LAST  = 2'd3;
 	/* verilator lint_off UNUSEDPARAM */
-	parameter CMD_CONF  = 2'd0;  
-	parameter CMD_START = 2'd1;
-	parameter CMD_DATA  = 2'd2;
-	parameter CMD_LAST  = 2'd3;
+	localparam CMD_DATA  = 2'd2;
 	/* verilator lint_on UNUSEDPARAM */
 
 	reg       data_v_q;
@@ -135,6 +135,7 @@ module io_intf(
 	// I/O
 	input wire clk, 
 	input wire nreset,
+
 	input wire en_i, 
 	
 	input wire       valid_i,
@@ -160,8 +161,6 @@ module io_intf(
 	output wire       block_first_o,
 	output wire       block_last_o
 );
-	parameter CMD_CONF  = 2'd0;  
-
 	// use project slice enable to gate design in order 
 	// to help reduce overall tt chip dynamic power 
 	// aka: play nice with other projects and be a responsible

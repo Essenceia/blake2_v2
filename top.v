@@ -23,9 +23,8 @@ module top(
 	wire block_first, block_last;
 	wire [4:0] unused_io; 
 
-	assign uio_oe = 8'b0001_1000;
-	assign uio_out[7:5] = 3'd0;
-	assign uio_out[2:0] = 3'd0;
+	assign uio_oe = 8'b1100_0000;
+	assign uio_out[5:0] = 6'd0;
 	assign unused_io = uio_in[7:3];
 
 	io_intf m_io(
@@ -37,8 +36,8 @@ module top(
 		.cmd_i(uio_in[2:1]),
 		.data_i(ui_in),
 
-		.ready_v_o(uio_out[4]),
-		.hash_v_o(uio_out[3]),
+		.ready_v_o(uio_out[6]),
+		.hash_v_o(uio_out[7]),
 		.hash_o(uo_out),
 
 		.ready_v_i(ready_v),	
