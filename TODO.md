@@ -1,5 +1,7 @@
 - [x] basic cocotb tb, test hash results
 - [ ] add invalid cycles in data transfert
+    - [x] in data
+    - [x] in config 
 - [ ] add 8/4 bit wide in/out data configuration, make 4 bit default: RP2040 PIO none consequtive bit limitation for the demo board
 - [ ] fpga emulation 
 - [ ] formal emultions

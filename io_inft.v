@@ -1,8 +1,9 @@
 module byte_size_config(
 	input wire clk, 
-	input wire nreset, 
-	input wire valid_i,
-	input wire config_v_i,
+	input wire nreset,
+ 
+	input wire       valid_i,
+	input wire [1:0] cmd_i,
 	input wire [7:0] data_i,
 
 	output wire [5:0]  kk_o,
@@ -10,6 +11,7 @@ module byte_size_config(
 	output wire [63:0] ll_o
 ); 
 	// configuration
+	parameter CMD_CONF        = 2'd0;  
 	/* verilator lint_off UNUSEDPARAM */
 	parameter CFG_CNT_KK      = 4'd0;
 	parameter CFG_CNT_NN      = 4'd1;
@@ -22,14 +24,16 @@ module byte_size_config(
 	reg [5:0]  kk_q, nn_q;
 	reg [63:0] ll_q;
 	wire       config_v; 
+	wire       config_n_v; 
 
-	assign config_v = valid_i & config_v_i;
+	assign config_v   = valid_i & (cmd_i == CMD_CONF);
+	assign config_n_v = valid_i & ~(cmd_i == CMD_CONF);
 
 	always @(posedge clk) begin
-		if ((~nreset) | ~valid_i | (valid_i & ~config_v_i)) begin
+		if ((~nreset) | config_n_v) begin
 			cfg_cnt_q <= '0;
 		end else begin
-			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + 'd1;
+			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + {2'b0, config_v};
 		end
 	end
 
@@ -82,9 +86,9 @@ module block_data(
 
 
 	assign start_v = valid_i & (cmd_i == CMD_START);	
-	assign last_v = valid_i & (cmd_i == CMD_LAST);	
-	assign data_v = valid_i & ~(cmd_i == CMD_CONF); 
-	assign conf_v = valid_i & (cmd_i == CMD_CONF);
+	assign last_v  = valid_i & (cmd_i == CMD_LAST);	
+	assign data_v  = valid_i & ~(cmd_i == CMD_CONF); 
+	assign conf_v  = valid_i & (cmd_i == CMD_CONF);
 
 	always @(posedge clk) begin
 		if (~nreset | conf_v) begin
@@ -172,7 +176,7 @@ module io_intf(
 		.clk(clk),
 		.nreset(nreset),
 		.valid_i(valid),
-		.config_v_i(cmd_i == CMD_CONF),
+		.cmd_i(cmd_i),
 		.data_i(data_i),
 
 		.kk_o(kk_o),

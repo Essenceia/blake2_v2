@@ -10,9 +10,10 @@ BB=64
 
 def get_cmd(valid=True, conf=False, start=False, data=False, last=False):
     check = [conf, start, data, last]
-    assert(sum(check) <= 1) # check one hot 0
-    cmd = 0
-    if (start):
+    assert(sum(check) == 1) # check one hot 0
+    if (conf):
+        cmd = 0
+    elif (start):
         cmd = 1;
     elif (data):
         cmd = 2
@@ -34,17 +35,20 @@ async def invalid_data(dut, cycles):
         await Timer(2, unit="ns")
 
 async def write_config(dut, kk, nn, ll):
-    dut.uio_in.value = 1 # valid 1, cmd = 0
-    # kk (8b), nn (8b), ll (64b)
-    dut.ui_in.value = kk
-    await Timer(2, unit="ns")
-    dut.ui_in.value = nn
-    await Timer(2, unit="ns")
-    if kk > 0:
+    cocotb.log.debug("write config kk: %d, nn:%d , ll: %d",kk, nn, ll)
+    if kk > 0: 
         ll = ll + BB
-    for i in range(0,8):
-        dut.ui_in.value = (ll >> 8*i) & 0xff
-        cocotb.log.debug("writing ll %s",dut.ui_in.value)
+    # kk (8b), nn (8b), ll (64b)
+    config_data = bytearray(0)
+    config_data.append(kk)
+    config_data.append(nn)
+    config_data.extend(ll.to_bytes(8, 'little'))
+    
+    for i in range(0,10):
+        if (random.randrange(0,100) > 75):
+            await invalid_data(dut, random.randrange(1,5)) 
+        dut.uio_in.value = get_cmd(conf=True)
+        dut.ui_in.value = config_data[i]
         await Timer(2, unit="ns")
     dut.uio_in.value = 0
 
