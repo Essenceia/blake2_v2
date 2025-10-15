@@ -111,6 +111,8 @@ async def test_hash(dut, kk, nn, ll, key, data):
     cocotb.log.debug("waiting for hash v to rise")
     await RisingEdge(dut.m_io.hash_v_o) 
     await FallingEdge(dut.clk) 
+    # one empty cycle, used for PIO wait instruction
+    await Timer(2, unit="ns")
     res = b''
     while (dut.m_io.hash_v_o.value == 1):
         x = dut.uo_out.value.to_unsigned()
@@ -158,7 +160,7 @@ async def dissable_test(dut):
     for i in range(0, c):
         assert(dut.uo_out.value == uo_out)
         # mask ready
-        assert(int(dut.uio_out.value) & 0xBF == 0)
+        assert(int(dut.uio_out.value) & 0xF7 == 0)
         Timer(2, unit="ns")
    
 # blake2 spec, appandix C blake2s test vector

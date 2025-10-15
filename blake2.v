@@ -438,11 +438,12 @@ module blake2 #(
 	assign ready_v_o = ((fsm_q == S_WAIT_DATA) | (fsm_q == S_IDLE));	
 
 	// hash finished result streaming
+	// assert h_v_o one cycle early to trigger PR2040 PIO wait instruction 
 	reg [7:0] res_q;
 	reg       res_v_q;
 	always @(posedge clk) begin
 		res_q <= h_q[0][7:0];
-		res_v_q <= (fsm_q == S_RES);
+		res_v_q <= (fsm_q == S_RES) | ((fsm_q == S_F_END) & last_block_q);
 	end
 	assign h_v_o = res_v_q;
 	assign h_o = res_q;
