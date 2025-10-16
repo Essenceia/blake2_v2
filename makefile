@@ -146,38 +146,10 @@ lint: $(entry_deps)
 #############
 # Testbench #
 #############
+# Call cocotb
+test:
+	$(MAKE) -C $(TB_DIR)
 
-# The list of testbenches.
-tbs := entry
-
-# Dependencies for each testbench
-entry_deps += $(TB_DIR)/entry_tb,v
-
-
-# Standard run recipe to build a given testbench
-define build_recipe
-$1_tb: $$($(1)_deps)
-	$$(call BUILD,$$^,$$@)
-
-endef
-
-# Standard run recipe to run a given testbench
-define run_recipe
-run_$1: $1_tb
-	$$(call RUN,$$^)
-
-endef
-
-# Generate run recipes for each testbench.
-$(eval $(foreach x,$(tbs),$(call run_recipe,$x)))
-
-
-# Generate build recipes for each testbench.
-$(eval $(foreach x,$(tbs),$(call build_recipe,$x)))
-
-####################
-# Standard targets #
-####################
 
 # Cleanup
 clean:
