@@ -48,17 +48,17 @@ set_io i_UART_RX 73
 set_io o_UART_TX 74
 
 ## VGA Outputs
-set_io vga_io[0] 26 # o_VGA_HSync 
-set_io vga_io[1] 27 # o_VGA_VSync 
-set_io vga_io[2] 36 # o_VGA_Red_0 
-set_io vga_io[3] 37 # o_VGA_Red_1 
-set_io vga_io[4] 40 # o_VGA_Red_2 
-set_io vga_io[5] 29 # o_VGA_Grn_0 
-set_io vga_io[6] 30 # o_VGA_Grn_1 
-set_io vga_io[7] 33 # o_VGA_Grn_2 
-set_io vga_io[8] 28 # o_VGA_Blu_0 
-set_io vga_io[9] 41 # o_VGA_Blu_1 
-set_io vga_io[10] 42 # o_VGA_Blu_2 
+set_io vga_i[0] 26 # o_VGA_HSync 
+set_io vga_i[1] 27 # o_VGA_VSync 
+set_io vga_i[2] 36 # o_VGA_Red_0 
+set_io vga_o[3] 37 # o_VGA_Red_1 
+set_io vga_o[4] 40 # o_VGA_Red_2 
+set_io vga_o[5] 29 # o_VGA_Grn_0 
+set_io vga_o[6] 30 # o_VGA_Grn_1 
+set_io vga_o[7] 33 # o_VGA_Grn_2 
+set_io vga_o[8] 28 # o_VGA_Blu_0 
+set_io vga_o[9] 41 # o_VGA_Blu_1 
+set_io vga_o[10] 42 # o_VGA_Blu_2 
 
 ## PMOD Signals
 set_io pmod_i[0] 65
