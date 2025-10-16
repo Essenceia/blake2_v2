@@ -104,17 +104,15 @@ module blake2 #(
 	endgenerate
 
 	// fsm
-
-	typedef enum reg [2:0] {
-		S_IDLE = 3'd0,
-	    S_WAIT_DATA = 3'd1,
-	    S_F = 3'd2,
-	    S_F_END = 3'd3, // write back h, save on mux on path to write back v to h
-	    S_RES = 3'd4 } e_fsm;
+	localparam [2:0] S_IDLE = 3'd0;
+	localparam [2:0] S_WAIT_DATA = 3'd1;
+	localparam [2:0] S_F = 3'd2;
+	localparam [2:0] S_F_END = 3'd3; // write back h, save on mux on path to write back v to h
+	localparam [2:0] S_RES = 3'd4;
 
 	reg first_block_q; 
 	reg last_block_q; 
-	e_fsm fsm_q;
+	reg [2:0] fsm_q;
 	wire f_finished;
 	reg [W_CLOG2_P1-1:0] res_cnt_q;
 	wire [W_CLOG2_P1-1:0] res_cnt_add;
