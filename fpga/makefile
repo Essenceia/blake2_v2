@@ -10,7 +10,7 @@ DEVICE=hx1k
 sv_files=$(PROJ).v $(wildcard ../*.v)
 
 $(PROJ).blif: $(sv_files)
-	yosys -p 'synth_ice40 -top $(PROJ) -blif $(PROJ).blif' -p 'read -sv $^' 
+	yosys -p 'read -sv $^' -p 'synth_ice40 -top $(PROJ) -blif $(PROJ).blif'
 
 $(PROJ).asc: $(PROJ).blif $(BSP)
 	arachne-pnr -P $(PKG) -d 1k -o $(PROJ).asc -p $(BSP) $(PROJ).blif
