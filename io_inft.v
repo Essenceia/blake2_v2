@@ -31,7 +31,7 @@ module byte_size_config(
 
 	always @(posedge clk) begin
 		if ((~nreset) | config_n_v) begin
-			cfg_cnt_q <= '0;
+			cfg_cnt_q <= 'd0;
 		end else begin
 			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + {3'b0, config_v};
 		end
@@ -92,7 +92,7 @@ module block_data(
 
 	always @(posedge clk) begin
 		if (~nreset | conf_v) begin
-			data_cnt_q <= '0;
+			data_cnt_q <= 'd0;
 		end else begin
 			{unused_data_cnt_q, data_cnt_q} <= data_cnt_q + {5'b0, data_v};
 		end
@@ -111,7 +111,7 @@ module block_data(
 
 	always @(posedge clk) begin
 		if ((~nreset) | ((data_cnt_q == 6'd0) & data_v & ~start_v))
-			start_q <= '0;
+			start_q <= 'd0;
 		else if (start_v)
 			start_q <= start_v;
 	end
@@ -119,7 +119,7 @@ module block_data(
 
 	always @(posedge clk) begin
 		if ((~nreset) | ((data_cnt_q == 6'd0) & data_v & ~last_v))
-			last_q <= '0;
+			last_q <= 'd0;
 		else if (last_v)
 			last_q <= last_v;
 	end

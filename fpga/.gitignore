@@ -2,3 +2,6 @@
 *.bin
 *.blif
 *.json
+*.gise
+*.xise
+_xmsgs

@@ -38,9 +38,11 @@ module blake2 #(
 	output [7:0]           h_o
 	);
 	localparam IB_CNT_W = BB - $clog2(BB);
+	localparam RND_W = $clog2(R);
+	localparam G_RND_W = $clog2(8);
 	 
-	reg  [2:0] g_idx_q; // G function idx, sub-round
-	reg  [3:0] round_q;
+	reg  [G_RND_W-1:0] g_idx_q; // G function idx, sub-round
+	reg  [RND_W-1:0] round_q;
 
 	wire [BB-1:0]  t;	
 	reg  [IB_CNT_W-1:0]  block_idx_plus_one_q;
@@ -152,8 +154,8 @@ module blake2 #(
 	reg unused_f_cnt_q;
 	always @(posedge clk) begin
 		case (fsm_q)
-			S_F: {unused_f_cnt_q, round_q, g_idx_q} <= {round_q, g_idx_q} + 'b1;
-			default: {round_q, g_idx_q} <= '0;
+			S_F: {unused_f_cnt_q, round_q, g_idx_q} <= {round_q, g_idx_q} + {{RND_W+G_RDN_W-1{1'b0}}, 1'b1};
+			default: {round_q, g_idx_q} <= {RND_W+G_RND_W{1'b0}};
 		endcase
 	end
 	assign f_finished = {round_q, g_idx_q} == { R_LAST, 3'd7};
@@ -167,11 +169,11 @@ module blake2 #(
 	end
 
 	wire unused_res_cnt_add;
-	assign {unused_res_cnt_add, res_cnt_add} = res_cnt_q + 'd1;
+	assign {unused_res_cnt_add, res_cnt_add} = res_cnt_q + {{W_CLOG2_P1-1{1'b0}}, 1'b1};
 	always @(posedge clk) begin
 		case(fsm_q)
 			S_RES: res_cnt_q <= res_cnt_add;
-			default: res_cnt_q <= '0;
+			default: res_cnt_q <= {W_CLOG2_P1{1'b0}};
 		endcase
 	end
 
@@ -241,7 +243,7 @@ module blake2 #(
 	genvar v_idx;
 	generate
 		for(v_idx = 0; v_idx<16; v_idx=v_idx+1 ) begin : loop_v_idx
-			assign v_current[v_idx] = ((round_q == 'd0) & (g_idx_q < 'd4))? v_init_2[v_idx] : v_q[v_idx];
+			assign v_current[v_idx] = ((round_q == {RND_W{1'b0}}) & (g_idx_q < 3'd4))? v_init_2[v_idx] : v_q[v_idx];
 		end
 	endgenerate
 
