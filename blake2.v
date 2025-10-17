@@ -5,6 +5,7 @@
 
 
 // Main blake2 module
+`define MISSING_CLOG2
 // default parameter configuration is for blake2b
 module blake2 #(	
 	parameter W      = 64, 
@@ -19,8 +20,8 @@ module blake2 #(
 	parameter BB_CLOG2   = $clog2(BB),
 	parameter W_CLOG2_P1 = $clog2((W+1)) // double paranthesis needed: verilator parsing bug
 `else
-	parameter BB_CLOG2   = 7,
-	parameter W_CLOG2_P1 = 7
+	parameter BB_CLOG2   = 6,
+	parameter W_CLOG2_P1 = 6
 `endif
 	)
 	(
@@ -42,10 +43,15 @@ module blake2 #(
 	output                 h_v_o,
 	output [7:0]           h_o
 	);
+`ifndef MISSING_CLOG2
 	localparam IB_CNT_W = BB - $clog2(BB);
 	localparam RND_W = $clog2(R);
 	localparam G_RND_W = $clog2(8);
-	 
+`else
+	localparam IB_CNT_W = 64 - 7;
+	localparam RND_W = 4;
+	localparam G_RND_W = 3;
+`endif
 	reg  [G_RND_W-1:0] g_idx_q; // G function idx, sub-round
 	reg  [RND_W-1:0] round_q;
 
@@ -159,7 +165,7 @@ module blake2 #(
 	reg unused_f_cnt_q;
 	always @(posedge clk) begin
 		case (fsm_q)
-			S_F: {unused_f_cnt_q, round_q, g_idx_q} <= {round_q, g_idx_q} + {{RND_W+G_RDN_W-1{1'b0}}, 1'b1};
+			S_F: {unused_f_cnt_q, round_q, g_idx_q} <= {round_q, g_idx_q} + {{RND_W+G_RND_W-1{1'b0}}, 1'b1};
 			default: {round_q, g_idx_q} <= {RND_W+G_RND_W{1'b0}};
 		endcase
 	end
