@@ -14,9 +14,14 @@ module blake2 #(
 	parameter R3     = 16,
 	parameter R4     = 63,
 	parameter R      = 12, // Number of rounds in v srambling
-	localparam [3:0] R_LAST = R-1,
-	localparam BB_CLOG2   = $clog2(BB),
-	localparam W_CLOG2_P1 = $clog2((W+1)) // double paranthesis needed: verilator parsing bug
+	parameter [3:0] R_LAST = R-1,
+`ifndef MISSING_CLOG2
+	parameter BB_CLOG2   = $clog2(BB),
+	parameter W_CLOG2_P1 = $clog2((W+1)) // double paranthesis needed: verilator parsing bug
+`else
+	parameter BB_CLOG2   = 7,
+	parameter W_CLOG2_P1 = 7
+`endif
 	)
 	(
 	input               clk,
