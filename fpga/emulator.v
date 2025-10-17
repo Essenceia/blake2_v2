@@ -2,13 +2,13 @@
 module emulator(
 	input wire clk,
 
-	input wire switch0_i,
-	input wire switch1_i,
+	input wire switch0_i, // rst
+	input wire switch1_i, // dissable design
 
 
-	input  wire [7:0] pmod_i,  
-	inout  wire [2:0] vga_i, 
-	inout  wire [10:3] vga_o, 
+	input   wire [7:0]  pmod_i,  
+	input   wire [2:0]  vga_i, 
+	output  wire [10:3] vga_o, 
 	
 	output wire       led0_o, // error led
 	output wire [6:0] segA_o,
@@ -22,8 +22,8 @@ wire [7:0] uio_in;
 wire [7:0] uio_out;
 wire [7:0]  uio_oe;
 
-assign rst_n = (switch0_i == 1'b0);
-assign ena = switch1_i;
+assign rst_n = ~switch0_i;
+assign ena = ~switch1_i;
 assign ui_in = pmod_i;
 assign segB_o =  hash[6:0];
 assign segA_o = { 6'b0 , hash[7]};
