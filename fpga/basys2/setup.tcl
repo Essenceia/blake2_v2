@@ -1,5 +1,5 @@
 set PROJ "emulator"
-set FILES [glob *.v ../*.v]
+set FILES [glob ../*.v ../../*.v]
 
 project new $PROJ
 project set family Spartan3E
