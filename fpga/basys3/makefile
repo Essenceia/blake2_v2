@@ -32,7 +32,8 @@ $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf: $(VIVADO_CHECKPOINT_PATH)
 gen: $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf
 
 
-clean: 
+clean:
+	rm -rf .Xil 
 	rm -rf $(VIVADO_PRJ_DIR)
 	rm -rf $(OUT_DIR)
 	rm -f vivado*{log,jou}

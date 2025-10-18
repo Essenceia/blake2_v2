@@ -1,12 +1,12 @@
 /* error detection module */ 
 module error(
-	input clk, 
-	input nreset,
+	input wire clk, 
+	input wire nreset,
 
-	input [7:0] uio_oe, 
-	input [7:0] uio_out,
+	input wire [7:0] uio_oe, 
+	input wire [7:0] uio_out,
 
-	output error_o
+	output wire error_o
 );
 reg  err_q;
 wire err_next;
