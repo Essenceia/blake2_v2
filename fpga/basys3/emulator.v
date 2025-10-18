@@ -4,9 +4,9 @@ module emulator(
 
 	input wire [1:0] switch_i,
 
-	input   wire [7:0]  pmodA_i,  
-	input   wire [7:0]  pmodB_io,  
-	input   wire [7:0]  pmodC_o,  
+	input  wire [7:0]  pmodA_i,  
+	inout  wire [7:0]  pmodB_io,  
+	output wire [7:0]  pmodC_o,  
  
 	output wire led_o
 );
