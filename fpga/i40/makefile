@@ -7,7 +7,7 @@ BSP=bsp.pcf
 PKG=vq100
 DEVICE=hx1k
 
-sv_files=$(wildcard *.v)  $(wildcard ../*.v)
+sv_files=$(wildcard ../*.v)  $(wildcard ../../*.v)
 
 $(PROJ).blif: $(sv_files)
 	yosys -p 'read -sv $^' -p 'synth_ice40 -top $(PROJ) -blif $(PROJ).blif'
