@@ -5,6 +5,8 @@ SRC:=$(wildcard *.c) $(wildcard *.h)
 ${BUILD_DIR}:
 	PROJECT_NAME=${PROJECT_NAME} cmake -S . ${BUILD_DIR}
 
+.PHONY: setup build
+
 setup: ${BUILD_DIR}
 
 build: setup ${SRC} CMakeLists.txt
