@@ -25,23 +25,23 @@ module blake2 #(
 `endif
 	)
 	(
-	input               clk,
-	input               nreset,
+	input wire               clk,
+	input wire               nreset,
 
-	input [W_CLOG2_P1-1:0] kk_i,
-	input [W_CLOG2_P1-1:0] nn_i,
-	input [BB-1:0]         ll_i,
+	input wire [W_CLOG2_P1-1:0] kk_i,
+	input wire [W_CLOG2_P1-1:0] nn_i,
+	input wire [BB-1:0]         ll_i,
 
 	input wire             block_first_i,               
 	input wire             block_last_i,               
 	
-	input                  data_v_i,
-	input [BB_CLOG2-1:0]   data_idx_i,	
-	input [7:0]            data_i,
+	input wire                  data_v_i,
+	input wire [BB_CLOG2-1:0]   data_idx_i,	
+	input wire [7:0]            data_i,
 
-	output                 ready_v_o,	
-	output                 h_v_o,
-	output [7:0]           h_o
+	output wire                 ready_v_o,	
+	output wire                 h_v_o,
+	output wire [7:0]           h_o
 	);
 `ifndef MISSING_CLOG2
 	localparam IB_CNT_W = BB - $clog2(BB);

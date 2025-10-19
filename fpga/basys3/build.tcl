@@ -10,7 +10,7 @@ open_project $project_path
 read_verilog [glob *.v]
 read_verilog [glob -directory $src_path *.v]
 read_verilog [glob -directory $utils_path *.v]
-read_xdc [glob -directory *.xdc]
+read_xdc [glob *.xdc]
 
 
 # synth
