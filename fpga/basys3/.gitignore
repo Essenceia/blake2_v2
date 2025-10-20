@@ -2,3 +2,4 @@
 emulator/
 vivado.*
 vivado_*
+*.swp
