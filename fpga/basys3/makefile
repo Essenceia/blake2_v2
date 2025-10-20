@@ -12,6 +12,8 @@ TOP_PATH=../
 OUT_DIR=out
 
 
+.PHONY: setup build gen
+
 all: setup build gen
 
 $(VIVADO_PRJ_PATH):  
@@ -36,7 +38,7 @@ clean:
 	rm -rf .Xil 
 	rm -rf $(VIVADO_PRJ_DIR)
 	rm -rf $(OUT_DIR)
-	rm -f vivado*{log,jou}
+	rm -f vivado*
 	rm -f webtalk*{log,jou}
 	rm -f usage_statistics_webtalk*{html,xml}
 	
