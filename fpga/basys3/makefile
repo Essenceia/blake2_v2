@@ -8,7 +8,7 @@ VIVADO_CHECKPOINT_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME)_checkpoint.dcp
 VIVADO_CMD=vivado -mode batch -source
 
 SRC_PATH=../..
-TOP_PATH=../
+UTILS_PATH=../
 OUT_DIR=out
 
 
@@ -18,12 +18,12 @@ all: setup build gen
 
 $(VIVADO_PRJ_PATH):  
 	mkdir -p $(VIVADO_PRJ_DIR)
-	$(VIVADO_CMD) setup.tcl -tclargs $(VIVADO_PRJ_DIR) $(VIVADO_PRJ_NAME)
+	$(VIVADO_CMD) setup.tcl -tclargs $(VIVADO_PRJ_DIR) $(VIVADO_PRJ_NAME) $(UTILS_PATH) $(SRC_PATH)  
 
 setup: $(VIVADO_PRJ_PATH) 
 
-$(VIVADO_CHECKPOINT_PATH): $(VIVADO_PRJ_PATH) $(wildcard *.xdc) $(wildcard $(SRC_PATH)/*.v) $(wildcard $(TOP_PATH)*.v)
-	$(VIVADO_CMD) build.tcl -tclargs $(VIVADO_PRJ_PATH) $(TOP_PATH) $(SRC_PATH) $(VIVADO_CHECKPOINT_PATH)
+$(VIVADO_CHECKPOINT_PATH): $(VIVADO_PRJ_PATH) $(wildcard *.xdc) $(wildcard $(SRC_PATH)/*.v) $(wildcard ${UTILS_PATH}/*.v) $(wildcard *.v)
+	$(VIVADO_CMD) build.tcl -tclargs $(VIVADO_PRJ_PATH) $(VIVADO_CHECKPOINT_PATH)
 
 build: $(VIVADO_CHECKPOINT_PATH)
 
