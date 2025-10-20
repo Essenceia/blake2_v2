@@ -273,7 +273,7 @@ module blake2 #(
 	reg  [W-1:0] g_a, g_b, g_c, g_d;
 	wire [W-1:0] g_x, g_y;
 	/* not using @(*) to work around xst limitation */
-	always @(g_idx_q[1:0], v_current[3], v_current[2], v_current[1], v_current[0]) begin 
+	always @(*) begin 
 		case(g_idx_q[1:0])
 			0: g_a = v_current[0];
 			1: g_a = v_current[1];
@@ -285,7 +285,7 @@ module blake2 #(
 	wire [1:0] g_b_idx;
 	wire unused_g_b_idx;
 	assign {unused_g_b_idx, g_b_idx} = g_idx_q[1:0] + {2'b0,g_idx_q[2]}; 
-	always @(g_b_idx, v_current[4], v_current[5], v_current[6], v_current[7]) begin
+	always @(*) begin
 		case(g_b_idx)
 			0: g_b = v_current[4];
 			1: g_b = v_current[5];
@@ -297,7 +297,7 @@ module blake2 #(
 	wire [1:0] g_c_idx; 
 	wire unused_g_c_idx; 
 	assign {unused_g_c_idx,g_c_idx} = g_idx_q + {g_idx_q[2], 1'b0};
-	always @(g_c_idx, v_current[8], v_current[9], v_current[10], v_current[11]) begin
+	always @(*) begin
 		case(g_c_idx)
 			0: g_c = v_current[8]; 
 			1: g_c = v_current[9]; 
@@ -309,7 +309,7 @@ module blake2 #(
 	wire [1:0] g_d_idx; 
 	wire unused_g_d_idx; 
 	assign {unused_g_d_idx,g_d_idx} = g_idx_q + {1'b0,{2{g_idx_q[2]}}};
-	always @(g_d_idx, v_current[12], v_current[13], v_current[14], v_current[15]) begin
+	always @(*) begin
 		case(g_d_idx)
 			0: g_d = v_current[12];
 			1: g_d = v_current[13];
@@ -336,24 +336,7 @@ module blake2 #(
 	endgenerate
 
 	reg [3:0] g_x_idx, g_y_idx;
-	always @(g_idx_q, 
-			 sigma_row_elems[0],
-			 sigma_row_elems[1],
-			 sigma_row_elems[2],
-			 sigma_row_elems[3],
-			 sigma_row_elems[4],
-			 sigma_row_elems[5],
-			 sigma_row_elems[6],
-			 sigma_row_elems[7],
-			 sigma_row_elems[8],
-			 sigma_row_elems[9],
-			 sigma_row_elems[10],
-			 sigma_row_elems[11],
-			 sigma_row_elems[12],
-			 sigma_row_elems[13],
-			 sigma_row_elems[14],
-			 sigma_row_elems[15]
-			 ) begin
+	always @(*) begin
 		case(g_idx_q)
 			0: {g_x_idx, g_y_idx} = {sigma_row_elems[0], sigma_row_elems[1]};
 			1: {g_x_idx, g_y_idx} = {sigma_row_elems[2], sigma_row_elems[3]};
