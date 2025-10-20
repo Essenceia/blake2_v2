@@ -5,19 +5,21 @@ module emulator #(
 	parameter LED_W = 1
 )
 (
-	input wire clk,
+	input wire clk_src_i,
 
 	input wire [SWITCH_W:0] switch_i,
 
 	input  wire [PMOD_W-1:0]  pmodA_i,  
 	inout  wire [PMOD_W-1:0]  pmodB_io,  
-	output wire [PMOD_W-1:0]  pmodC_o,  
+	output wire [PMOD_W-1:0]  pmodD_o,  
  
 	output wire [LED_W-1:0] led_o
 );
 localparam [7:0] DISSABLE_IO_PIN = 8'b0111000;
 
-wire rst_n, ena;
+wire clk_ibufg, clk;
+wire rst_n, rst_n_q;
+wire ena, ena_q;
 wire error; 
 wire [7:0] ui_in;
 wire [7:0] uo_out; 
@@ -25,11 +27,13 @@ wire [7:0] uio_in;
 wire [7:0] uio_out;
 wire [7:0] uio_oe;
 wire [SWITCH_W-1:0] switch;
-wire [LED_W-1:0] led;
+wire [LED_W-1:0] led;/* clk */
 
-assign rst_n = ~switch[0];
-assign ena = ~switch[1];
-assign led[0] = error;
+/* clk */ 
+IBUFG m_ibuf_clk(
+	.I(clk_src_i),
+	.O(clk_ibufg)
+);
 
 /* IO buffers */ 
 genvar i; 
@@ -63,6 +67,11 @@ generate
 		);
 	end
 endgenerate
+
+assign rst_n = ~switch[0];
+assign ena = ~switch[1];
+
+assign led[0] = error;
 
 top m_top(
 	.ui_in(ui_in),
