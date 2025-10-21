@@ -43,15 +43,8 @@ set_property -dict { PACKAGE_PIN B16   IOSTANDARD LVCMOS33 } [get_ports {hash_ct
 set_property -dict { PACKAGE_PIN C16   IOSTANDARD LVCMOS33 } [get_ports {hash_ctrl_o[1]}];#Sch name = JB10
 
 #Pmod Header JC
-set_property -dict { PACKAGE_PIN K17   IOSTANDARD LVCMOS33 } [get_ports {clk_bus_i}];#Sch name = JC1
+set_property -dict { PACKAGE_PIN L17  IOSTANDARD LVCMOS33 } [get_ports {clk_bus_i}];#Sch name = JC7
 create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk_bus_i]
-#set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 } [get_ports {pmodC_i[1]}];#Sch name = JC2
-#set_property -dict { PACKAGE_PIN N17   IOSTANDARD LVCMOS33 } [get_ports {pmodC_i[2]}];#Sch name = JC3
-#set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33 } [get_ports {pmodC_i[3]}];#Sch name = JC4
-#set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports {pmodC_i[4]}];#Sch name = JC7
-#set_property -dict { PACKAGE_PIN M19   IOSTANDARD LVCMOS33 } [get_ports {pmodC_i[5]}];#Sch name = JC8
-#set_property -dict { PACKAGE_PIN P17   IOSTANDARD LVCMOS33 } [get_ports {pmodC_i[6]}];#Sch name = JC9
-#set_property -dict { PACKAGE_PIN R18   IOSTANDARD LVCMOS33 } [get_ports {pmodC_i[7]}];#Sch name = JC10
 
 #Pmod Header JD
 set_property -dict { PACKAGE_PIN J3   IOSTANDARD LVCMOS33 } [get_ports {hash_o[0]}];#Sch name = XA1_P
