@@ -7,7 +7,7 @@ module emulator #(
 (
 	input wire clk_bus_i, /* 100 MHz */
 
-	input wire [SWITCH_W:0] switch_i,
+	input wire [SWITCH_W-1:0] switch_i,
 
 	// PmodA	
 	input  wire [PMOD_W-1:0]  data_i,  
@@ -21,7 +21,7 @@ module emulator #(
 );
 localparam [7:0] DISSABLE_IO_PIN = 8'b0111000;
 
-wire clk_ibuf, clk_io_bus, clk_pll, clk_pll_feedback, clk;
+wire clk_ibuf, clk_bufr, clk_pll, clk_pll_feedback, clk;
 wire pll_lock;
 wire ena;
 wire rst_async, ena_async;
@@ -36,9 +36,9 @@ wire [7:0] uio_oe;
 wire [SWITCH_W-1:0] switch;
 wire [LED_W-1:0] led;/* clk */
 
-(* IOB = "TRUE" *) reg [PMOD_W-1:0] data_bus_q, hash_bus_q;
-(* IOB = "TRUE" *) reg [2:0] data_ctrl_bus_q;
-(* IOB = "TRUE" *) reg [1:0] hash_ctrl_bus_q;
+reg [PMOD_W-1:0] data_bus_q, hash_bus_q;
+reg [2:0] data_ctrl_bus_q;
+reg [1:0] hash_ctrl_bus_q;
 reg [PMOD_W-1:0] data_q, hash_q;
 reg [2:0] data_ctrl_q;
 reg [1:0] hash_ctrl_q;
@@ -52,26 +52,23 @@ IBUF m_ibuf_clk(
 	.O(clk_ibuf)
 );
 BUFR m_bufio_clk(
+	.CLR(1'b0),
 	.CE(1'b1),
-	.CLR(1'b0), // unused in current bypass config
 	.I(clk_ibuf),
-	.O(clk_io_bus)
+	.O(clk_bufr)
 );
 BUFG m_bufg_clk(
-	.I(clk_ibuf),
+	.I(clk_pll),
 	.O(clk)
 );
 // I/O bank buffers, driver by bufr, optimized skew with parallel clk
 // infer ILOGIC and OLOGIC blocks
-always @(posedge clk_io_bus) begin
+always @(posedge clk_bufr) begin
 	data_bus_q <= data_i;
 	data_ctrl_bus_q <= data_ctrl_i;
 	hash_bus_q <= hash_q;
 	hash_ctrl_bus_q <= hash_ctrl_q;
 end
-assign hash_o = hash_bus_q;
-assign hash_ctrl_o = hash_ctrl_bus_q;
-
 // sync to global clock
 always @(posedge clk) begin
 	data_q <= data_bus_q;
@@ -79,6 +76,9 @@ always @(posedge clk) begin
 	hash_q <= hash;
 	hash_ctrl_q <= hash_ctrl;
 end
+assign hash_o = hash_bus_q;
+assign hash_ctrl_o = hash_ctrl_bus_q;
+
 
 // Global clock based on bus clock, using the same frequency
 // using the inherent jitter filtering capability of the PLL
@@ -90,7 +90,7 @@ PLLE2_BASE #(
 ) m_global_clk_pll (
    .CLKFBIN(clk_pll_feedback),
    .CLKFBOUT(clk_pll_feedback),
-   .CLKIN1(clk_io_bus),    
+   .CLKIN1(clk_bufr),    
    .CLKOUT0(clk_pll),
    .CLKOUT1(),
    .CLKOUT2(),
