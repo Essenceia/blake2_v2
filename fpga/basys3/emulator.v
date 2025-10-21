@@ -5,7 +5,7 @@ module emulator #(
 	parameter LED_W = 3
 )
 (
-	input wire clk_bus_i, /* 100 MHz */
+	input wire clk_bus_i, /* 50 MHz for now */
 
 	input wire [SWITCH_W-1:0] switch_i,
 
@@ -23,6 +23,7 @@ localparam [7:0] DISSABLE_IO_PIN = 8'b0111000;
 
 wire clk_ibuf, clk_bufr, clk_pll, clk_pll_feedback, clk;
 wire pll_lock;
+reg  pll_lock_q;
 wire ena;
 wire rst_async, ena_async;
 reg rst_n_q;
@@ -45,25 +46,13 @@ reg [1:0] hash_ctrl_q;
 wire [PMOD_W-1:0] hash;
 wire [1:0] hash_ctrl;
 
-
-/* BUS */ 
-IBUF m_ibuf_clk(
-	.I(clk_bus_i),
-	.O(clk_ibuf)
-);
-BUFR m_bufio_clk(
-	.CLR(1'b0),
-	.CE(1'b1),
-	.I(clk_ibuf),
-	.O(clk_bufr)
-);
 BUFG m_bufg_clk(
 	.I(clk_pll),
 	.O(clk)
 );
 // I/O bank buffers, driver by bufr, optimized skew with parallel clk
 // infer ILOGIC and OLOGIC blocks
-always @(posedge clk_bufr) begin
+always @(posedge clk) begin
 	data_bus_q <= data_i;
 	data_ctrl_bus_q <= data_ctrl_i;
 	hash_bus_q <= hash_q;
@@ -84,13 +73,14 @@ assign hash_ctrl_o = hash_ctrl_bus_q;
 // using the inherent jitter filtering capability of the PLL
 // and phase locked on bus clokc
 PLLE2_BASE #(
-   .CLKFBOUT_MULT(2),        
-   .CLKIN1_PERIOD(10.0),      
-   .CLKOUT0_DIVIDE(2)
+   .CLKFBOUT_MULT(20),        
+   .CLKIN1_PERIOD(20.0),      
+   .CLKOUT0_DIVIDE(20),
+   .DIVCLK_DIVIDE(1)
 ) m_global_clk_pll (
    .CLKFBIN(clk_pll_feedback),
    .CLKFBOUT(clk_pll_feedback),
-   .CLKIN1(clk_bufr),    
+   .CLKIN1(clk_bus_i),    
    .CLKOUT0(clk_pll),
    .CLKOUT1(),
    .CLKOUT2(),
@@ -120,15 +110,19 @@ endgenerate
 assign rst_async = switch[0];
 
 assign led[0] = rst_async;
-assign led[1] = pll_lock;
+assign led[1] = pll_lock_q;
 assign led[2] = error;
 
 /* rst */
-always @(posedge clk or posedge rst_async) 
-	if (rst_async)
+always @(posedge clk or posedge rst_async) begin
+	if (rst_async) begin
 		rst_n_q <= 1'b1;
-	else
-		rst_n_q <= ~pll_lock; 
+		pll_lock_q <= 1'b0;
+	end else begin
+		pll_lock_q <= pll_lock;
+		rst_n_q <= ~pll_lock_q; 
+	end
+end
 
 debounce m_switch_debounce(
 	.clk(clk),

@@ -44,7 +44,7 @@ set_property -dict { PACKAGE_PIN C16   IOSTANDARD LVCMOS33 } [get_ports {hash_ct
 
 #Pmod Header JC
 set_property -dict { PACKAGE_PIN L17  IOSTANDARD LVCMOS33 } [get_ports {clk_bus_i}];#Sch name = JC7
-create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk_bus_i]
+create_clock -add -name sys_clk_pin -period 20.00 -waveform {0 5} [get_ports clk_bus_i]
 
 #Pmod Header JD
 set_property -dict { PACKAGE_PIN J3   IOSTANDARD LVCMOS33 } [get_ports {hash_o[0]}];#Sch name = XA1_P

@@ -13,7 +13,7 @@ read_verilog [glob -directory $utils_path *.v]
 read_xdc [glob *.xdc]
 
 # to save the hastle of calling synth with top specified
-set_property top my_top emulator [current_fileset]
+set_property top emulator [current_fileset]
 
 close_project
 exit 0
