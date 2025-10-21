@@ -13,6 +13,8 @@ place_design
 route_design
 phys_opt_design
 
+report_timing_summary -no_detailed_paths
+
 write_checkpoint $checkpoint_path -force 
 close_project
 exit 0

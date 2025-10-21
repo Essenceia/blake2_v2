@@ -5,7 +5,7 @@ module emulator #(
 	parameter LED_W = 3
 )
 (
-	input wire clk_bus_i, /* 50 MHz for now */
+	input wire clk_bus_i, /* 40 MHz for now */
 
 	input wire [SWITCH_W-1:0] switch_i,
 
@@ -73,9 +73,9 @@ assign hash_ctrl_o = hash_ctrl_bus_q;
 // using the inherent jitter filtering capability of the PLL
 // and phase locked on bus clokc
 PLLE2_BASE #(
-   .CLKFBOUT_MULT(20),        
-   .CLKIN1_PERIOD(20.0),      
-   .CLKOUT0_DIVIDE(20),
+   .CLKFBOUT_MULT(25),        
+   .CLKIN1_PERIOD(25.0),      
+   .CLKOUT0_DIVIDE(25),
    .DIVCLK_DIVIDE(1)
 ) m_global_clk_pll (
    .CLKFBIN(clk_pll_feedback),

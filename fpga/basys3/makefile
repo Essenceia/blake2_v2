@@ -29,9 +29,9 @@ build: $(VIVADO_CHECKPOINT_PATH)
 
 $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf: $(VIVADO_CHECKPOINT_PATH) 
 	mkdir -p $(OUT_DIR)
-	$(VIVADO_CMD) gen.tcl -tclargs $(VIVADO_CHECKPOINT_PATH) $(OUT_DIR)
+	$(VIVADO_CMD) program.tcl -tclargs $(VIVADO_CHECKPOINT_PATH) $(OUT_DIR)
 
-gen: $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf
+prog: $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf
 
 
 clean:
