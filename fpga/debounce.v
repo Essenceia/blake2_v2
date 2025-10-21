@@ -25,7 +25,7 @@ always @(posedge clk or posedge rst_async) begin
             debounce_reg[k] <= 0;
         end
     end else begin
-        cnt_reg <= cnt_reg + d1;
+        cnt_reg <= cnt_reg + {{CNT_W-1{1'b0}}, 1'b1};
         
         if (cnt_reg == {CNT_W{1'b0}}) begin
             for (k = 0; k < W; k = k + 1) begin
