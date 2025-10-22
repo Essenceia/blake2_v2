@@ -206,14 +206,16 @@ module io_intf(
 	 	.block_last_o(block_last_o)
 	);
 	// loopback mode 
-	always @(posedge clk)
-		if (~rst_n)
+	always @(posedge clk) 
+		if (~nreset)
 			loopback_mode_q <= LOOPBACK_NONE;
 		else (en_q)
 			loopback_mode_q <= loopback_mode_i;
+	
 	assign cmd = {2'b0, loopback_mode_q, cmd_i, valid_i}; // rebuild cmd
 
 	assign ready_v_o = ready_v_i & ~data_v_o;
 	assign hash_v_o = hash_v_i;
-	assign hash_o = (loopback_mode_q == LOOPBACK_NONE) hash_i : (loopback_mode_q == LOOPBACK_DATA) ? data_i : cmd;
+	assign hash_o = (loopback_mode_q == LOOPBACK_NONE) ? hash_i
+				  : (loopback_mode_q == LOOPBACK_DATA) ? data_i : cmd;
 endmodule

@@ -2,7 +2,7 @@
 module emulator #(
 	parameter SWITCH_W = 2,
 	parameter PMOD_W = 8,
-	parameter LED_W = 3
+	parameter LED_W = 11
 )
 (
 	input wire clk_bus_i, /* 40 MHz for now */
@@ -19,8 +19,6 @@ module emulator #(
  
 	output wire [LED_W-1:0] led_o
 );
-localparam [7:0] DISSABLE_IO_PIN = 8'b0111000;
-
 wire clk_ibuf, clk_bufr, clk_pll, clk_pll_feedback, clk;
 wire pll_lock;
 reg  pll_lock_q;
@@ -35,7 +33,7 @@ wire [7:0] uio_in;
 wire [7:0] uio_out;
 wire [7:0] uio_oe;
 wire [SWITCH_W-1:0] switch;
-wire [LED_W-1:0] led;/* clk */
+wire [LED_W-1:0] led;
 
 reg [PMOD_W-1:0] data_bus_q, hash_bus_q;
 reg [2:0] data_ctrl_bus_q;
@@ -50,23 +48,18 @@ BUFG m_bufg_clk(
 	.I(clk_pll),
 	.O(clk)
 );
-// I/O bank buffers, driver by bufr, optimized skew with parallel clk
-// infer ILOGIC and OLOGIC blocks
 always @(posedge clk) begin
 	data_bus_q <= data_i;
-	data_ctrl_bus_q <= data_ctrl_i;
-	hash_bus_q <= hash_q;
-	hash_ctrl_bus_q <= hash_ctrl_q;
-end
-// sync to global clock
-always @(posedge clk) begin
 	data_q <= data_bus_q;
+	data_ctrl_bus_q <= data_ctrl_i;
 	data_ctrl_q <= data_ctrl_bus_q;
-	hash_q <= hash;
 	hash_ctrl_q <= hash_ctrl;
+	hash_ctrl_bus_q <= hash_ctrl_q;
+	hash_q <= hash;
+	hash_bus_q <= hash_q;
 end
-assign hash_o = hash_bus_q;
 assign hash_ctrl_o = hash_ctrl_bus_q;
+assign hash_o = hash_bus_q;
 
 
 // Global clock based on bus clock, using the same frequency
@@ -112,6 +105,7 @@ assign rst_async = switch[0];
 assign led[0] = rst_async;
 assign led[1] = pll_lock_q;
 assign led[2] = error;
+assign led[10:8] = data_q; /* help debug RPI PIO code */
 
 /* rst */
 always @(posedge clk or posedge rst_async) begin
