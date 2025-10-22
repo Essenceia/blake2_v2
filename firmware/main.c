@@ -1,31 +1,29 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
+#include "hardware/pio.h"
+#include "loopback.pio.h"
 
 #define LED_DELAY_MS 1000
-
-// Perform initialisation
-int pico_led_init(void) {
-    // A device like Pico that uses a GPIO for the LED will define PICO_DEFAULT_LED_PIN
-    // so we can use normal GPIO functionality to turn the led on and off
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-    return PICO_OK;
-}
-
-// Turn the led on or off
-void pico_set_led(bool led_on) {
-    // Just set the GPIO on or off
-    gpio_put(PICO_DEFAULT_LED_PIN, led_on);
-}
-
 int main() {
-	bool led = true;
-    int rc = pico_led_init();
-    hard_assert(rc == PICO_OK);
+	PIO pio;
+	uint sm, offset, led = 1;
+	
 	stdio_init_all();
+	bool s = pio_claim_free_sm_and_add_program_for_gpio_range(
+		&loopback_program, 
+		&pio,
+		&sm, 
+		&offset,
+		PICO_DEFAULT_LED_PIN, 
+		1, 
+		true);
+	printf("Starting PIO test, init sucess %d:{%d:%d}", s, sm, offset);
+	hard_assert(s);
+
+	loopback_program_init(pio, sm, offset, PICO_DEFAULT_LED_PIN);	
     while (true) {
-        pico_set_led(led);
-		led = !led;
+		pio_sm_put_blocking(pio, sm, led);
+		led = led ? 0:1;
 		printf("Teapot ! <3\n");
         sleep_ms(LED_DELAY_MS);
     }

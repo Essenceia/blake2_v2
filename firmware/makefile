@@ -1,6 +1,6 @@
 BUILD_DIR:=artifact
 PROJECT_NAME:=blake2s_asic_firmeware
-SRC:=$(wildcard *.c) $(wildcard *.h)
+SRC:=$(wildcard *.c) $(wildcard *.h) $(wildcard *.pio)
 
 ${BUILD_DIR}: CMakeLists.txt
 	PROJECT_NAME=${PROJECT_NAME} cmake -S . ${BUILD_DIR}
@@ -13,7 +13,7 @@ build: setup ${SRC}
 	cmake --build ${BUILD_DIR} --target ${PROJECT_NAME}
 	
 flash:
-	sudo cp ${BUILD_DIR}/${PROJECT_NAME}.uf2 /mnt/rpi/.
+	sudo cp ${BUILD_DIR}/${PROJECT_NAME}.uf2 /mnt/rpi
 
 # using default baudrate
 serial:
