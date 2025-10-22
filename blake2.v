@@ -5,7 +5,6 @@
 
 
 // Main blake2 module
-`define MISSING_CLOG2
 // default parameter configuration is for blake2b
 module blake2 #(	
 	parameter W      = 64, 
@@ -16,13 +15,8 @@ module blake2 #(
 	parameter R4     = 63,
 	parameter R      = 12, // Number of rounds in v srambling
 	parameter [3:0] R_LAST = R-1,
-`ifndef MISSING_CLOG2
 	parameter BB_CLOG2   = $clog2(BB),
 	parameter W_CLOG2_P1 = $clog2((W+1)) // double paranthesis needed: verilator parsing bug
-`else
-	parameter BB_CLOG2   = 6,
-	parameter W_CLOG2_P1 = 6
-`endif
 	)
 	(
 	input wire               clk,
@@ -43,15 +37,10 @@ module blake2 #(
 	output wire                 h_v_o,
 	output wire [7:0]           h_o
 	);
-`ifndef MISSING_CLOG2
 	localparam IB_CNT_W = BB - $clog2(BB);
-	localparam RND_W = $clog2(R);
-	localparam G_RND_W = $clog2(8);
-`else
-	localparam IB_CNT_W = 64 - 7;
-	localparam RND_W = 4;
-	localparam G_RND_W = 3;
-`endif
+	localparam RND_W    = $clog2(R);
+	localparam G_RND_W  = $clog2(8);
+
 	reg  [G_RND_W-1:0] g_idx_q; // G function idx, sub-round
 	reg  [RND_W-1:0] round_q;
 

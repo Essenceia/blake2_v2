@@ -165,10 +165,12 @@ module io_intf(
 );
 	localparam [1:0] LOOPBACK_NONE   = 2'b00;
 	localparam [1:0] LOOPBACK_DATA   = 2'b01;
+/* verilator lint_off UNUSEDPARAM */
 	localparam [1:0] LOOPBACK_CTRL   = 2'b10;
 	localparam [1:0] LOOPBACK_CTRL_2 = 2'b11;
+/* verilator lint_on UNUSEDPARAM */
 	reg [1:0] loopback_mode_q;
-	wire cmd;
+	wire [7:0] cmd;
  
 	// use project slice enable to gate design in order 
 	// to help reduce overall tt chip dynamic power 
@@ -209,10 +211,10 @@ module io_intf(
 	always @(posedge clk) 
 		if (~nreset)
 			loopback_mode_q <= LOOPBACK_NONE;
-		else (en_q)
+		else if(en_q)
 			loopback_mode_q <= loopback_mode_i;
 	
-	assign cmd = {2'b0, loopback_mode_q, cmd_i, valid_i}; // rebuild cmd
+	assign cmd = {3'b0, loopback_mode_q, cmd_i, valid_i}; // rebuild cmd
 
 	assign ready_v_o = ready_v_i & ~data_v_o;
 	assign hash_v_o = hash_v_i;
