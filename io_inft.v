@@ -142,6 +142,8 @@ module io_intf(
 	input wire [1:0] cmd_i,
 	input wire [7:0] data_i,
 
+	input wire [1:0] loopback_mode_i,
+
 	output wire       ready_v_o,
 	output wire       hash_v_o,
 	output wire [7:0] hash_o,
@@ -161,6 +163,13 @@ module io_intf(
 	output wire       block_first_o,
 	output wire       block_last_o
 );
+	localparam [1:0] LOOPBACK_NONE   = 2'b00;
+	localparam [1:0] LOOPBACK_DATA   = 2'b01;
+	localparam [1:0] LOOPBACK_CTRL   = 2'b10;
+	localparam [1:0] LOOPBACK_CTRL_2 = 2'b11;
+	reg [1:0] loopback_mode_q;
+	wire cmd;
+ 
 	// use project slice enable to gate design in order 
 	// to help reduce overall tt chip dynamic power 
 	// aka: play nice with other projects and be a responsible
@@ -196,8 +205,15 @@ module io_intf(
 	 	.block_first_o(block_first_o),
 	 	.block_last_o(block_last_o)
 	);
+	// loopback mode 
+	always @(posedge clk)
+		if (~rst_n)
+			loopback_mode_q <= LOOPBACK_NONE;
+		else (en_q)
+			loopback_mode_q <= loopback_mode_i;
+	assign cmd = {2'b0, loopback_mode_q, cmd_i, valid_i}; // rebuild cmd
 
 	assign ready_v_o = ready_v_i & ~data_v_o;
 	assign hash_v_o = hash_v_i;
-	assign hash_o = hash_i;
+	assign hash_o = (loopback_mode_q == LOOPBACK_NONE) hash_i : (loopback_mode_q == LOOPBACK_DATA) ? data_i : cmd;
 endmodule
