@@ -34,6 +34,5 @@ static inline void bus_clk_program_init(PIO pio, uint sm , uint offset, uint pin
 	// not enabling the sm here, will let the caller do so so that
 	// multiple state machines can be triggered at the same time 
 	// as to keep them in sync
-	pio_sm_set_enabled(pio, sm, true); // TODO: move to common start
 }
 %}

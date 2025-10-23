@@ -22,7 +22,8 @@ target_sources(${project_name} PRIVATE ${c_code_src})
 target_link_libraries(${project_name}
 	pico_stdlib
 	hardware_pio
-	hardware_clocks)
+	hardware_clocks
+	)
 
 # enable usb
 pico_enable_stdio_usb(${project_name} 1)
