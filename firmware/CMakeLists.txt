@@ -9,9 +9,22 @@ project(${project_name})
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_executable(${project_name}
-    blink.c
-)
+FILE(GLOB c_code_src *.c *.h)
+FILE(GLOB pio_code_src *.pio)
 
-target_link_libraries(${project_name} pico_stdlib)
+message(STATUS "c code src "${c_code_src})
+
+add_executable(${project_name})
+
+pico_generate_pio_header(${project_name} ${pio_code_src})
+target_sources(${project_name} PRIVATE ${c_code_src})
+
+target_link_libraries(${project_name}
+	pico_stdlib
+	hardware_pio)
+
+# enable usb
+pico_enable_stdio_usb(${project_name} 1)
+pico_enable_stdio_uart(${project_name} 0)
+
 pico_add_extra_outputs(${project_name})
