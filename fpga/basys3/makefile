@@ -16,7 +16,7 @@ OUT_DIR=out
 
 all: setup build gen
 
-$(VIVADO_PRJ_PATH):  
+$(VIVADO_PRJ_PATH): setup.tcl 
 	mkdir -p $(VIVADO_PRJ_DIR)
 	$(VIVADO_CMD) setup.tcl -tclargs $(VIVADO_PRJ_DIR) $(VIVADO_PRJ_NAME) $(UTILS_PATH) $(SRC_PATH)  
 
