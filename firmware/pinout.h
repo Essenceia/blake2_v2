@@ -2,7 +2,7 @@
 #define _PINNOUT_H
 
 /* define pinnout to FPGA emulation */ 
-#define CLK_PIN 28
+#define BUS_CLK_PIN 28
 
 #define DATA_BASE_PIN 0 
 #define CTRL_BASE_PIN 7
