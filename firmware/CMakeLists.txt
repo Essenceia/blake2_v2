@@ -12,7 +12,7 @@ pico_sdk_init()
 FILE(GLOB c_code_src *.c *.h)
 FILE(GLOB pio_code_src *.pio)
 
-message(STATUS "c code src "${c_code_src})
+message(STATUS "c code src " ${c_code_src})
 
 add_executable(${project_name})
 
@@ -23,6 +23,7 @@ target_link_libraries(${project_name}
 	pico_stdlib
 	hardware_pio
 	hardware_clocks
+	hardware_timer
 	)
 
 # enable usb

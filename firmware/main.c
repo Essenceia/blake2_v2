@@ -5,8 +5,10 @@
 #include "loopback.pio.h"
 #include "bus_clk.pio.h"
 #include "pinout.h" 
+#include "loopback_utils.h" 
 
-#define LED_DELAY_MS 1000
+#define DELAY_MS 1000
+
 #define PIO_N 2 // number of PIO SM used
 #define PIO_LED 0
 #define PIO_CLK 1
@@ -50,13 +52,17 @@ int main() {
 	gpio_set_drive_strength(BUS_CLK_PIN, GPIO_DRIVE_STRENGTH_12MA);
 	gpio_set_slew_rate(BUS_CLK_PIN, GPIO_SLEW_RATE_FAST);
 
-	pio_sm_set_enabled(pio[PIO_CLK], sm[PIO_CLK], true); 
-	
+	pio_sm_set_enabled(pio[PIO_CLK], sm[PIO_CLK], true); 	
 
+	/* loopback test */ 
+	init_loopback_ctrl();
+	init_loopback_data_hash_bus();
+	
     while (true) {
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
-		printf("Teapot ! div %f <3\n", clk_div);
-        sleep_ms(LED_DELAY_MS);
+		printf("Teapot ! clk div %f <3\n", clk_div);
+        sleep_ms(DELAY_MS);
+		test_data_loopback(2, 50);	
     }
 }
