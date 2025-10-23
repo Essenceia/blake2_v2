@@ -4,6 +4,7 @@
 /* define pinnout to FPGA emulation */ 
 #define BUS_CLK_PIN 28
 
+#define DATA_W        8
 #define DATA_BASE_PIN 0 
 #define CTRL_BASE_PIN 7
 #define HASH_BASE_PIN 16
