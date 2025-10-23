@@ -2,7 +2,7 @@
 module emulator #(
 	parameter SWITCH_W = 2,
 	parameter PMOD_W = 8,
-	parameter LED_W = 12
+	parameter LED_W = 13
 )
 (
 	input wire clk_bus_i, /* 40 MHz for now */
@@ -17,9 +17,11 @@ module emulator #(
 	// Pmod D
 	output wire [PMOD_W-1:0]  hash_o,  
  
-	output wire [LED_W-1:0] led_o
+	output wire [LED_W-1:0] led_o,
+
+	output wire [11:0] unused_o
 );
-wire clk_ibuf, clk_bufr, clk_pll, clk_pll_feedback, clk;
+wire clk_ibuf, clk_pll, clk_pll_feedback, clk;
 wire pll_lock;
 reg  pll_lock_q;
 wire ena;
@@ -35,28 +37,31 @@ wire [7:0] uio_oe;
 wire [SWITCH_W-1:0] switch;
 wire [LED_W-1:0] led;
 
-reg [PMOD_W-1:0] data_bus_q, hash_bus_q;
-reg [2:0] data_ctrl_bus_q;
-reg [1:0] hash_ctrl_bus_q;
-reg [PMOD_W-1:0] data_q, hash_q;
-reg [2:0] data_ctrl_q;
-reg [1:0] hash_ctrl_q;
+reg [PMOD_W-1:0] data_bus_q, data_q;
+reg [PMOD_W-1:0] hash_bus_q, hash_q;
+reg [2:0] data_ctrl_bus_q, data_ctrl_q;
+reg [1:0] hash_ctrl_bus_q, hash_ctrl_q;
 wire [PMOD_W-1:0] hash;
 wire [1:0] hash_ctrl;
+
+IBUF m_ibuf_clk(
+	.I(clk_bus_i),
+	.O(clk_ibuf)
+);
 
 BUFG m_bufg_clk(
 	.I(clk_pll),
 	.O(clk)
 );
 always @(posedge clk) begin
-	data_bus_q <= data_i;
-	data_q <= data_bus_q;
+	data_bus_q      <= data_i;
+	data_q          <= data_bus_q;
 	data_ctrl_bus_q <= data_ctrl_i;
-	data_ctrl_q <= data_ctrl_bus_q;
-	hash_ctrl_q <= hash_ctrl;
+	data_ctrl_q     <= data_ctrl_bus_q;
+	hash_ctrl_q     <= hash_ctrl;
 	hash_ctrl_bus_q <= hash_ctrl_q;
-	hash_q <= hash;
-	hash_bus_q <= hash_q;
+	hash_q          <= hash;
+	hash_bus_q      <= hash_q;
 end
 assign hash_ctrl_o = hash_ctrl_bus_q;
 assign hash_o = hash_bus_q;
@@ -73,7 +78,7 @@ PLLE2_BASE #(
 ) m_global_clk_pll (
    .CLKFBIN(clk_pll_feedback),
    .CLKFBOUT(clk_pll_feedback),
-   .CLKIN1(clk_bus_i),    
+   .CLKIN1(clk_ibuf),    
    .CLKOUT0(clk_pll),
    .CLKOUT1(),
    .CLKOUT2(),
@@ -105,19 +110,22 @@ assign rst_async = switch[0];
 assign led[0] = rst_async;
 assign led[1] = rst_n_d1_q;
 assign led[2] = pll_lock_q;
-assign led[3] = error;
-assign led[11:9] = data_q; /* help debug RPI PIO code */
+assign led[3] = clk_ibuf; /* raw clk, help confirm wiring */
+assign led[4] = error;
+assign led[12:5] = data_q; /* help debug RPI PIO code */
+
+assign unused_o = 12'h03F;
 
 /* rst */
 always @(posedge clk or posedge rst_async) begin
 	if (rst_async) begin
 		pll_lock_q <= 1'b0;
-		rst_n_q    <= 1'b1;
-		rst_n_d1_q <= 1'b1;
+		rst_n_q    <= 1'b0;
+		rst_n_d1_q <= 1'b0;
 	end else begin
 		pll_lock_q <= pll_lock;
-		rst_n_q    <= ~pll_lock_q; 
-		rst_n_d1_q <= ~rst_n_d1_q; 
+		rst_n_q    <= pll_lock_q; 
+		rst_n_d1_q <= rst_n_q; 
 	end
 end
 
