@@ -2,7 +2,7 @@
 module emulator #(
 	parameter SWITCH_W = 2,
 	parameter PMOD_W = 8,
-	parameter LED_W = 11
+	parameter LED_W = 12
 )
 (
 	input wire clk_bus_i, /* 40 MHz for now */
@@ -24,7 +24,7 @@ wire pll_lock;
 reg  pll_lock_q;
 wire ena;
 wire rst_async, ena_async;
-reg rst_n_q;
+reg rst_n_q, rst_n_d1_q;
 wire error;
  
 wire [7:0] ui_in;
@@ -103,18 +103,21 @@ endgenerate
 assign rst_async = switch[0];
 
 assign led[0] = rst_async;
-assign led[1] = pll_lock_q;
-assign led[2] = error;
-assign led[10:8] = data_q; /* help debug RPI PIO code */
+assign led[1] = rst_n_d1_q;
+assign led[2] = pll_lock_q;
+assign led[3] = error;
+assign led[11:9] = data_q; /* help debug RPI PIO code */
 
 /* rst */
 always @(posedge clk or posedge rst_async) begin
 	if (rst_async) begin
-		rst_n_q <= 1'b1;
 		pll_lock_q <= 1'b0;
+		rst_n_q    <= 1'b1;
+		rst_n_d1_q <= 1'b1;
 	end else begin
 		pll_lock_q <= pll_lock;
-		rst_n_q <= ~pll_lock_q; 
+		rst_n_q    <= ~pll_lock_q; 
+		rst_n_d1_q <= ~rst_n_d1_q; 
 	end
 end
 
