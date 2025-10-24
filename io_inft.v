@@ -214,7 +214,7 @@ module io_intf(
 		else if(en_q)
 			loopback_mode_q <= loopback_mode_i;
 	
-	assign cmd = {3'b0, loopback_mode_q, cmd_i, valid_i}; // rebuild cmd
+	assign cmd = {2'b0, loopback_mode_q, 1'b0, cmd_i, valid_i}; // rebuild cmd
 
 	assign ready_v_o = ready_v_i & ~data_v_o;
 	assign hash_v_o = hash_v_i;
