@@ -26,7 +26,7 @@ wire clk_ibuf, clk_pll, clk_pll_feedback, clk;
 wire pll_lock;
 reg  pll_lock_q;
 wire ena;
-wire rst_async, ena_async;
+wire rst_async;
 reg rst_n_q, rst_n_d1_q;
 wire error;
  
@@ -66,11 +66,13 @@ PLLE2_BASE #(
    .CLKFBOUT(clk_pll_feedback),
    .CLKIN1(clk_ibuf),    
    .CLKOUT0(clk_pll),
+/* verilator lint_off PINCONNECTEMPTY */
    .CLKOUT1(),
    .CLKOUT2(),
    .CLKOUT3(),
    .CLKOUT4(),
    .CLKOUT5(),
+/* verilator lint_on PINCONNECTEMPTY */
    .LOCKED(pll_lock),
    .PWRDWN(1'b0),
    .RST(rst_async) 
