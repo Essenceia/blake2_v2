@@ -124,9 +124,9 @@ assign led[5] = ena;
 
 assign led[13:6] = data_q; /* help debug RPI PIO code */
 
-// led_o[15:14] <- assigned via bebug probe tcl script 
+assign led[15:14] =  loopback_ctrl_q; 
 
-assign unused_o = 12'h03F;
+assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
 /* rst */
 always @(posedge clk or posedge rst_async) begin
@@ -144,7 +144,7 @@ end
 debounce m_switch_debounce(
 	.clk(clk),
 	.rst_async(rst_async),
-	.switch_i(switch_i[1]),
+	.switch_i(switch[1]),
 	.switch_o(ena)
 );
 
