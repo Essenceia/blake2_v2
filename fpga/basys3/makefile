@@ -12,7 +12,7 @@ UTILS_PATH=../
 OUT_DIR=out
 
 
-.PHONY: setup build gen
+.PHONY: setup build prog gui
 
 all: setup build gen
 
@@ -33,6 +33,8 @@ $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf: $(VIVADO_CHECKPOINT_PATH)
 
 prog: $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf
 
+gui: $(VIVADO_CHECKPOINT_PATH)
+	vivado $(VIVADO_CHECKPOINT_PATH)
 
 clean:
 	rm -rf .Xil 
