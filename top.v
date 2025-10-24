@@ -24,8 +24,9 @@ module top(
 	wire [2:0] unused_io; 
 
 	assign uio_oe = 8'b1000_1000;
-	assign uio_out[5:0] = 6'd0;
-	assign unused_io = { uin_in[7:6], uio_in[3]};
+	assign uio_out[6:4] = 3'd0;
+	assign uio_out[2:0] = 3'd0;
+	assign unused_io = { uio_in[7:6], uio_in[3]};
 
 	io_intf m_io(
 		.clk(clk),
