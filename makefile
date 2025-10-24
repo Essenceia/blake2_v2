@@ -139,10 +139,14 @@ build:
 ########
 
 entry_deps := $(wildcard *.v)
+fpga_deps := $(entry_deps) $(wildcard fpga/*.v) $(wildcard fpga/basys3/*.v)
 
 lint: $(entry_deps)
 	$(call LINT,$^,top)
 
+lint_fpga: $(fpga_deps)
+	$(call LINT,$^,emulator)
+ 
 #############
 # Testbench #
 #############
