@@ -2,7 +2,7 @@
 module emulator #(
 	parameter SWITCH_W = 2,
 	parameter PMOD_W = 8,
-	parameter LED_W = 13
+	parameter LED_W = 14
 )
 (
 	input wire clk_bus_i, /* 40 MHz for now */
@@ -13,6 +13,7 @@ module emulator #(
 	input  wire [PMOD_W-1:0]  data_i,  
 	// Pmod B
 	input  wire [2:0]         data_ctrl_i,
+	input  wire [1:0]         loopback_ctrl_i,
 	output wire [1:0]         hash_ctrl_o,
 	// Pmod D
 	output wire [PMOD_W-1:0]  hash_o,  
@@ -41,6 +42,7 @@ reg [PMOD_W-1:0] data_bus_q, data_q;
 reg [PMOD_W-1:0] hash_bus_q, hash_q;
 reg [2:0] data_ctrl_bus_q, data_ctrl_q;
 reg [1:0] hash_ctrl_bus_q, hash_ctrl_q;
+reg [1:0] loopback_ctrl_bus_q, loopback_ctrl_q;
 wire [PMOD_W-1:0] hash;
 wire [1:0] hash_ctrl;
 
@@ -58,13 +60,18 @@ always @(posedge clk) begin
 	data_q          <= data_bus_q;
 	data_ctrl_bus_q <= data_ctrl_i;
 	data_ctrl_q     <= data_ctrl_bus_q;
+	loopback_ctrl_bus_q <= loopback_ctrl_i;
+	loopback_ctrl_q     <= loopback_ctrl_bus_q;
+end
+
+always @(posedge clk) begin
 	hash_ctrl_q     <= hash_ctrl;
 	hash_ctrl_bus_q <= hash_ctrl_q;
 	hash_q          <= hash;
 	hash_bus_q      <= hash_q;
 end
 assign hash_ctrl_o = hash_ctrl_bus_q;
-assign hash_o = hash_bus_q;
+assign hash_o      = hash_bus_q;
 
 
 // Global clock based on bus clock, using the same frequency
@@ -112,7 +119,9 @@ assign led[1] = rst_n_d1_q;
 assign led[2] = pll_lock_q;
 assign led[3] = clk_ibuf; /* raw clk, help confirm wiring */
 assign led[4] = error;
-assign led[12:5] = data_q; /* help debug RPI PIO code */
+assign led[5] = ena;
+
+assign led[13:6] = data_q; /* help debug RPI PIO code */
 
 assign unused_o = 12'h03F;
 
@@ -137,7 +146,7 @@ debounce m_switch_debounce(
 );
 
 assign ui_in = data_q;
-assign uio_in = {5'b0, data_ctrl_q};
+assign uio_in = {2'b0, loopback_ctrl_q, 1'b0, data_ctrl_q};
 assign hash = uo_out;
 assign hash_ctrl = {uio_out[7], uio_out[3]};
 
