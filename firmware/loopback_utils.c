@@ -13,6 +13,7 @@ void init_loopback_ctrl()
 		gpio_set_drive_strength(x, GPIO_DRIVE_STRENGTH_12MA);
 		gpio_pull_down(x);	
 	}
+	gpio_put_masked(DATA_MASK << CTRL_BASE_PIN, 0);
 }
 
 void set_loopback_none() {
@@ -51,15 +52,17 @@ void test_data_loopback(uint32_t loops, uint32_t delay_ms)
 
 	for(uint32_t i=0; i < loops; i++)
 	{
-		sleep_ms(delay_ms);
 	
 		_Static_assert(DATA_BASE_PIN == 0);
 
 		/* write data, use current time as pseudo random data */ 
 		rand = time_us_32();
 		data_wr = DATA_MASK & rand; 
-		gpio_put_masked(DATA_MASK, data_wr);
+		for (uint i = 0; i < DATA_W; i++)
+			gpio_put(i, (data_wr >> i) & 0x1);
+		//gpio_put_masked(DATA_MASK, data_wr);
 		
+		sleep_ms(delay_ms);
 		/* read data and compare with written data */
 		data_rd_raw = gpio_get_all();
 		data_rd = 0;

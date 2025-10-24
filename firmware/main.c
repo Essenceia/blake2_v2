@@ -61,8 +61,6 @@ int main() {
     while (true) {
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
-		printf("Updated !\n");
-        sleep_ms(DELAY_MS);
-		test_data_loopback(2, 50);	
+		test_data_loopback(1, DELAY_MS);	
     }
 }
