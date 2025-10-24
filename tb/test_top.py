@@ -158,7 +158,7 @@ async def dissable_test(dut):
     for i in range(0, c):
         assert(dut.uo_out.value == uo_out)
         # mask ready
-        assert(int(dut.uio_out.value) & 0xBF == 0)
+        assert(int(dut.uio_out.value) & 0xF7 == 0)
         Timer(2, unit="ns")
    
 # blake2 spec, appandix C blake2s test vector

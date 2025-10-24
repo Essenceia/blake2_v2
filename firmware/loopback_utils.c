@@ -10,18 +10,19 @@ void init_loopback_ctrl()
 	for(uint x= CTRL_BASE_PIN; x < CTRL_BASE_PIN+DATA_W; x++) {
 		gpio_init(x);
 		gpio_set_dir(x, GPIO_OUT);
-		gpio_set_drive_strength(x, GPIO_DRIVE_STRENGTH_12MA);	
+		gpio_set_drive_strength(x, GPIO_DRIVE_STRENGTH_12MA);
+		gpio_pull_down(x);	
 	}
 }
 
 void set_loopback_none() {
-	gpio_clr_mask((uint32_t)CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1);
+	gpio_clr_mask((uint32_t)CTRL_LOOPBACK_MASK << CTRL_BASE_PIN);
 }
 void set_loopback_data() {
-	gpio_put_masked(CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1, CTRL_LOOPBACK_DATA << CTRL_BASE_PIN+1);
+	gpio_put_masked(CTRL_LOOPBACK_MASK << CTRL_BASE_PIN, CTRL_LOOPBACK_DATA << CTRL_BASE_PIN);
 }
 void set_loopback_ctrl() {
-	gpio_put_masked(CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1, CTRL_LOOPBACK_CTRL << CTRL_BASE_PIN+1);
+	gpio_put_masked(CTRL_LOOPBACK_MASK << CTRL_BASE_PIN, CTRL_LOOPBACK_CTRL << CTRL_BASE_PIN);
 }
 
 /* data and hash ( data out ) bus */ 
@@ -31,6 +32,7 @@ void init_loopback_data_hash_bus(){
 		gpio_init(x);
 		gpio_set_dir(x, GPIO_OUT);
 		gpio_set_drive_strength(x, GPIO_DRIVE_STRENGTH_12MA);	
+		gpio_pull_down(x);	
 	}
 	for(x= HASH_BASE_PIN; x < HASH_BASE_PIN+DATA_W; x++) {
 		gpio_init(x);
@@ -59,8 +61,10 @@ void test_data_loopback(uint32_t loops, uint32_t delay_ms)
 		gpio_put_masked(DATA_MASK, data_wr);
 		
 		/* read data and compare with written data */
-		data_rd_raw = gpio_get_all(); 
-		data_rd = (data_rd_raw >> HASH_BASE_PIN +1) & DATA_MASK;
+		data_rd_raw = gpio_get_all();
+		data_rd = 0;
+		for(uint8_t w=0,x=HASH_BASE_PIN; x< HASH_BASE_PIN+DATA_W; x++,w++)
+			data_rd |= gpio_get(x) << w;
 
 		if (data_rd == data_wr ) printf("["__FILE__"] data match 0x0%2x\n", data_wr);	
 		else printf("["__FILE__" data missmatch wr:0x%02x, rd:0x%02x (raw:0x%08x)\n", data_wr, data_rd, data_rd_raw);	

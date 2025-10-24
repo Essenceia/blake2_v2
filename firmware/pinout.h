@@ -6,8 +6,8 @@
 
 #define DATA_W        8
 #define DATA_BASE_PIN 0 
-#define CTRL_BASE_PIN 7
-#define HASH_BASE_PIN 15
+#define CTRL_BASE_PIN 8
+#define HASH_BASE_PIN 16
 
 /* data */ 
 #define DATA_MASK (uint32_t) 0xFF
