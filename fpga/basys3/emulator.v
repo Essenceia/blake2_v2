@@ -2,7 +2,7 @@
 module emulator #(
 	parameter SWITCH_W = 2,
 	parameter PMOD_W = 8,
-	parameter LED_W = 14
+	parameter LED_W = 16
 )
 (
 	input wire clk_bus_i, /* 40 MHz for now */
@@ -45,6 +45,7 @@ reg [1:0] hash_ctrl_bus_q, hash_ctrl_q;
 reg [1:0] loopback_ctrl_bus_q, loopback_ctrl_q;
 wire [PMOD_W-1:0] hash;
 wire [1:0] hash_ctrl;
+
 
 IBUF m_ibuf_clk(
 	.I(clk_bus_i),
@@ -122,6 +123,8 @@ assign led[4] = error;
 assign led[5] = ena;
 
 assign led[13:6] = data_q; /* help debug RPI PIO code */
+
+// led_o[15:14] <- assigned via bebug probe tcl script 
 
 assign unused_o = 12'h03F;
 

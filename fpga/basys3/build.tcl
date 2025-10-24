@@ -7,6 +7,8 @@ open_project $project_path
 # synth
 synth_design -top emulator
 
+source debug_probes.tcl
+
 # implement
 opt_design
 place_design
