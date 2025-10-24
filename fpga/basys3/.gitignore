@@ -5,3 +5,4 @@ vivado_*
 *.swp
 out
 usage_statistics_webtalk.*
+webtalk.*
