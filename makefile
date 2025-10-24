@@ -48,7 +48,7 @@ WAVE_DIR := wave
 DEBUG_FLAG := $(if $(debug), debug=1)
 DEFINES := $(if $(wave),wave=1)
 WAIVER_FILE := waiver.vlt
-
+FPGA_LIB:= lib
 ########
 # Lint #
 ########
@@ -62,6 +62,7 @@ else
 LINT_FLAGS += -Wall -Wpedantic -Wno-GENUNNAMED -Wno-LATCH -Wno-IMPLICIT
 LINT_FLAGS += -Wno-DECLFILENAME
 LINT_FLAGS +=$(if $(wip),-Wno-UNUSEDSIGNAL)
+LINT_FLAGS += -Ilib
 endif
 
 # Lint commands.
@@ -74,7 +75,7 @@ else
 	
 define LINT
 	mkdir -p build
-	verilator $(CONF)/$(WAIVER_FILE) --lint-only $(LINT_FLAGS) $1 --top $2
+	verilator $(CONF)/$(WAIVER_FILE) --lint-only $(LINT_FLAGS) --no-timing $1 --top $2
 endef
 endif
 
