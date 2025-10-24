@@ -18,12 +18,10 @@ void set_loopback_none() {
 	gpio_clr_mask((uint32_t)CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1);
 }
 void set_loopback_data() {
-	gpio_clr_mask((uint32_t)CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1);
-	gpio_set_mask((uint32_t)CTRL_LOOPBACK_DATA << CTRL_BASE_PIN+1);
+	gpio_put_masked(CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1, CTRL_LOOPBACK_DATA << CTRL_BASE_PIN+1);
 }
 void set_loopback_ctrl() {
-	gpio_clr_mask((uint32_t)CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1);
-	gpio_set_mask((uint32_t)CTRL_LOOPBACK_CTRL << CTRL_BASE_PIN+1);
+	gpio_put_masked(CTRL_LOOPBACK_MASK << CTRL_BASE_PIN+1, CTRL_LOOPBACK_CTRL << CTRL_BASE_PIN+1);
 }
 
 /* data and hash ( data out ) bus */ 
@@ -61,9 +59,9 @@ void test_data_loopback(uint32_t loops, uint32_t delay_ms)
 		
 		/* read data and compare with written data */
 		data_rd_raw = gpio_get_all(); 
-		data_rd = (data_rd_raw & ( DATA_MASK << HASH_BASE_PIN+1)) >> HASH_BASE_PIN + 1;
+		data_rd = (data_rd_raw >> HASH_BASE_PIN +1) & DATA_MASK;
 
 		if (data_rd == data_wr ) printf("["__FILE__"] data match 0x0%2x\n", data_wr);	
-		else printf("["__FILE__" data missmatch wr:0x%02x, rd:0x%02x\n", data_wr, data_rd);	
+		else printf("["__FILE__" data missmatch wr:0x%02x, rd:0x%02x (raw:0x%08x)\n", data_wr, data_rd, data_rd_raw);	
 	}
 }
