@@ -35,6 +35,7 @@ void init_loopback_data_hash_bus(){
 	for(x= HASH_BASE_PIN; x < HASH_BASE_PIN+DATA_W; x++) {
 		gpio_init(x);
 		gpio_set_dir(x, GPIO_IN);
+		gpio_pull_down(x);
 	}
 }
 

@@ -13,7 +13,7 @@
 #define DATA_MASK (uint32_t) 0xFF
  
 /* loopback mode ctrl */ 
-#define CTRL_LOOPBACK_DATA (uint32_t) 0x08 
-#define CTRL_LOOPBACK_CTRL (uint32_t) 0x10 
-#define CTRL_LOOPBACK_MASK (uint32_t) 0x18 // bits [4:3] 8'b0001_1000
+#define CTRL_LOOPBACK_DATA (uint32_t) 0x10 
+#define CTRL_LOOPBACK_CTRL (uint32_t) 0x20 
+#define CTRL_LOOPBACK_MASK (uint32_t) 0x30 // bits [5:4] 8'b0011_0000
 #endif //_PINNOUT_H

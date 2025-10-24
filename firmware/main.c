@@ -61,7 +61,7 @@ int main() {
     while (true) {
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
-		printf("Teapot ! clk div %f <3\n", clk_div);
+		printf("Teapot !\n");
         sleep_ms(DELAY_MS);
 		test_data_loopback(2, 50);	
     }
