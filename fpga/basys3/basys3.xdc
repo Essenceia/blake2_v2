@@ -43,6 +43,11 @@ set_property -dict { PACKAGE_PIN A17   IOSTANDARD LVCMOS33 PULLDOWN true } [get_
 set_property -dict { PACKAGE_PIN C16   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_ctrl_o[1]}];#Sch name = JB10
 
 #Pmod Header JC
+set_property -dict { PACKAGE_PIN K17   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[4]}];#Sch name = JC1
+set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[5]}];#Sch name = JC2
+set_property -dict { PACKAGE_PIN N17   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[6]}];#Sch name = JC3
+set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[7]}];#Sch name = JC4
+# clk 
 set_property -dict { PACKAGE_PIN L17  IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {clk_bus_i}];#Sch name = JC7
 create_clock -add -name clk_bus_i -period 25.00 [get_ports clk_bus_i]
 
@@ -51,10 +56,10 @@ set_property -dict { PACKAGE_PIN J3   IOSTANDARD LVCMOS33 PULLDOWN true } [get_p
 set_property -dict { PACKAGE_PIN L3   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[1]}];#Sch name = XA2_P
 set_property -dict { PACKAGE_PIN M2   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[2]}];#Sch name = XA3_P
 set_property -dict { PACKAGE_PIN N2   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[3]}];#Sch name = XA4_P
-set_property -dict { PACKAGE_PIN K3   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[4]}];#Sch name = XA1_N
-set_property -dict { PACKAGE_PIN M3   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[5]}];#Sch name = XA2_N
-set_property -dict { PACKAGE_PIN M1   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[6]}];#Sch name = XA3_N
-set_property -dict { PACKAGE_PIN N1   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[7]}];#Sch name = XA4_N
+#set_property -dict { PACKAGE_PIN K3   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[4]}];#Sch name = XA1_N
+#set_property -dict { PACKAGE_PIN M3   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[5]}];#Sch name = XA2_N
+#set_property -dict { PACKAGE_PIN M1   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[6]}];#Sch name = XA3_N
+#set_property -dict { PACKAGE_PIN N1   IOSTANDARD LVCMOS33 PULLDOWN true } [get_ports {hash_o[7]}];#Sch name = XA4_N
 
 # tie unused pins
 set_property -dict { PACKAGE_PIN W7   IOSTANDARD LVCMOS33 } [get_ports {unused_o[0]}]

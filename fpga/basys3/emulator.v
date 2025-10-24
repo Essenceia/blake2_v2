@@ -38,6 +38,7 @@ wire [7:0] uio_oe;
 wire [SWITCH_W-1:0] switch;
 wire [LED_W-1:0] led;
 
+wire [PMOD_W-1:0] data;
 reg [PMOD_W-1:0] data_bus_q, data_q;
 reg [PMOD_W-1:0] hash_bus_q, hash_q;
 reg [2:0] data_ctrl_bus_q, data_ctrl_q;
@@ -46,34 +47,11 @@ reg [1:0] loopback_ctrl_bus_q, loopback_ctrl_q;
 wire [PMOD_W-1:0] hash;
 wire [1:0] hash_ctrl;
 
-
+/* clk */
 IBUF m_ibuf_clk(
 	.I(clk_bus_i),
 	.O(clk_ibuf)
 );
-
-BUFG m_bufg_clk(
-	.I(clk_pll),
-	.O(clk)
-);
-always @(posedge clk) begin
-	data_bus_q      <= data_i;
-	data_q          <= data_bus_q;
-	data_ctrl_bus_q <= data_ctrl_i;
-	data_ctrl_q     <= data_ctrl_bus_q;
-	loopback_ctrl_bus_q <= loopback_ctrl_i;
-	loopback_ctrl_q     <= loopback_ctrl_bus_q;
-end
-
-always @(posedge clk) begin
-	hash_ctrl_q     <= hash_ctrl;
-	hash_ctrl_bus_q <= hash_ctrl_q;
-	hash_q          <= hash;
-	hash_bus_q      <= hash_q;
-end
-assign hash_ctrl_o = hash_ctrl_bus_q;
-assign hash_o      = hash_bus_q;
-
 
 // Global clock based on bus clock, using the same frequency
 // using the inherent jitter filtering capability of the PLL
@@ -98,6 +76,30 @@ PLLE2_BASE #(
    .RST(rst_async) 
 );
 
+BUFG m_bufg_clk(
+	.I(clk_pll),
+	.O(clk)
+);
+
+always @(posedge clk) begin
+	data_bus_q      <= data;
+	data_q          <= data_bus_q;
+
+	data_ctrl_bus_q <= data_ctrl_i;
+	data_ctrl_q     <= data_ctrl_bus_q;
+
+	loopback_ctrl_bus_q <= loopback_ctrl_i;
+	loopback_ctrl_q     <= loopback_ctrl_bus_q;
+end
+
+always @(posedge clk) begin
+	hash_ctrl_q     <= hash_ctrl;
+	hash_ctrl_bus_q <= hash_ctrl_q;
+	hash_q          <= hash;
+	hash_bus_q      <= hash_q;
+end
+
+
 genvar i;
 generate 
 	for (i=0; i < SWITCH_W; i=i+1) begin: g_switch_ibuf
@@ -112,8 +114,31 @@ generate
 			.O(led_o[i])
 		);
 	end
+	/* data signals */
+	for (i=0; i < PMOD_W; i=i+1) begin: g_data_ibuf
+		IBUF m_data_ibuf(
+			.I(data_i[i]),
+			.O(data[i])
+		);
+	end
+	for (i=0; i < PMOD_W; i=i+1) begin: g_hash_obuf
+		OBUF m_hash_obuf(
+			.I(hash_bus_q[i]),
+			.O(hash_o[i])
+		);
+	end
+	/* ctrl signals */ 
+	for (i=0; i < 2; i=i+1) begin: g_hash_ctrl_obuf
+		OBUF m_hash_ctrl_obuf(
+			.I(hash_ctrl_bus_q[i]),
+			.O(hash_ctrl_o[i])
+		);
+	end
+
 endgenerate
-assign rst_async = switch[0];
+
+/* debug leds */
+
 
 assign led[0] = rst_async;
 assign led[1] = rst_n_d1_q;
@@ -122,13 +147,15 @@ assign led[3] = clk_ibuf; /* raw clk, help confirm wiring */
 assign led[4] = error;
 assign led[5] = ena;
 
-assign led[13:6] = data_q; /* help debug RPI PIO code */
+assign led[13:6] = ui_in; /* help debug RPI PIO code */
 
 assign led[15:14] =  loopback_ctrl_q; 
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
 /* rst */
+assign rst_async = switch[0];
+
 always @(posedge clk or posedge rst_async) begin
 	if (rst_async) begin
 		pll_lock_q <= 1'b0;
@@ -148,10 +175,13 @@ debounce m_switch_debounce(
 	.switch_o(ena)
 );
 
+/* deisgn top level */ 
 assign ui_in = data_q;
 assign uio_in = {2'b0, loopback_ctrl_q, 1'b0, data_ctrl_q};
-assign hash = uo_out;
-assign hash_ctrl = {uio_out[7], uio_out[3]};
+
+assign hash         = uo_out;
+assign hash_ctrl[1] = uio_out[7]; // hash_v
+assign hash_ctrl[0] = uio_out[3]; // ready
 
 top m_top(
 	.ui_in(ui_in),
@@ -164,7 +194,8 @@ top m_top(
 	.rst_n(rst_n_q)
 );
 
-// error 
+/* hw error detection */ 
+
 error m_err(
 	.clk(clk), 
 	.nreset(rst_n_q), 
