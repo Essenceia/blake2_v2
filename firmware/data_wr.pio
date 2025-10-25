@@ -1,0 +1,59 @@
+.program data_wr
+
+; send data from rpi to hw, writes both ctrl and data bus 
+' expected to be running at 2xBUS_CLK freq
+
+; will use auto pulling from the tx fifo to write to the gpio
+; if the fifo is empty pull should block
+; -> when blocked the content of the X scratch should be written
+;    this will deactivate the valid bit on the data transfer line
+
+; write X scratch register content, will be read to the OSR during blocking
+; -> set to all 0s 
+.init_state:
+	set x, 0
+
+; wait for ready 
+; then read config and data from the fifo ( streamed from dma )
+; if no data is available write then content of X scratch
+.wr:
+.wrap_target
+	wait 1 gpio CTRL_READY_PIN [1]
+	wait 0 gpio BUS_CLK_PIN 
+	out pins, DATA_WR_W [1]
+.wrap
+
+% c-sdk {
+
+static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
+	uint8_t i;
+	pio_sm_config c = bus_clk_program_get_default_config(offset);
+
+	// enable pins, connect to pio
+	for(i=DATA_BASE_PIN; i < DATA_BASE_PIN + DATA_W; i++){ // data
+		pio_gpio_init(pio, i);
+	}
+	pio_sm_set_consecutive_pindirs(pio, sm, DATA_BASE_PIN, DATA_W, true);
+	for(uint8_t i=CTRL_DATA_BASE_PIN; i < CTRL_DATA_BASE_PIN + CTRL_DATA_W; i++){ // ctrl data
+		pio_gpio_init(pio, i);
+	}
+	pio_sm_set_consecutive_pindirs(pio, sm, CTRL_DATA_BASE_PIN, CTRL_DATA_W, true);
+
+	pio_gpio_init(pio, CTRL_READY_PIN);
+	pio_sm_set_consecutive_pindirs(pio, sm, CTRL_READY_PIN, 1, false); // input pin, technically not needed to be set for input
+	pio_sm_set_consecutive_pindirs(pio, sm, BUS_CLK_PIN, 1, false); // pin already init by bus clk pio
+	
+
+	// join fifo's for one large fifo since sm is tx only
+	sm_config_set_fifo_join(c, PIO_FIFO_JOIN_TX);
+
+	// enable fifo autopull and set threashold (32)
+	sm_config_get_out_shift(c, true, true, DATA_WR_W);
+ 
+	// clear fifo's
+	pio_sm_clear_fifos(pio, sm);	
+
+}
+
+%}
+

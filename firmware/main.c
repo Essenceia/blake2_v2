@@ -4,8 +4,9 @@
 #include "hardware/pio.h"
 #include "loopback.pio.h"
 #include "bus_clk.pio.h"
+
 #include "pinout.h" 
-#include "loopback_utils.h" 
+#include "data_wr.pio.h"
 
 #define DELAY_MS 1000
 
@@ -52,15 +53,21 @@ int main() {
 	gpio_set_drive_strength(BUS_CLK_PIN, GPIO_DRIVE_STRENGTH_12MA);
 	gpio_set_slew_rate(BUS_CLK_PIN, GPIO_SLEW_RATE_FAST);
 
-	pio_sm_set_enabled(pio[PIO_CLK], sm[PIO_CLK], true); 	
+	/* data wr */ 
+	s &= pio_claim_free_sm_and_add_program(&data_wr_program, &pio[DATA_WR], &sm[DATA_WR], &offset[DATA_WR]);
+	log_init(DATA_WR);
+	hard_assert(s);
+	data_wr_program_init(pio[DATA_WR], sm[DATA_WR], offset[DATA_WR]);
 
-	/* loopback test */ 
-	init_loopback_ctrl();
-	init_loopback_data_hash_bus();
+	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
+	pio_sm_set_enabled(pio[PIO_CLK], sm[PIO_CLK], true); 	
+	sleep_ms(10);
+	pio_sm_set_enabled(pio[DATA_WR], sm[DATA_WR], true); 	
 	
     while (true) {
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
-		test_data_loopback(1, DELAY_MS);	
+		printf("Hello\n");
+	s	sleep_ms(DELAY_MS);
     }
 }
