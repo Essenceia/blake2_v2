@@ -10,9 +10,10 @@
 
 #define DELAY_MS 1000
 
-#define PIO_N 2 // number of PIO SM used
+#define PIO_N 3 // number of PIO SM used
 #define PIO_LED 0
 #define PIO_CLK 1
+#define PIO_WR  2
 #define macro_str(x) #x
 
 #define PICO_SYS_CLK_HW 200000000 // 200 MHz
@@ -54,20 +55,20 @@ int main() {
 	gpio_set_slew_rate(BUS_CLK_PIN, GPIO_SLEW_RATE_FAST);
 
 	/* data wr */ 
-	s &= pio_claim_free_sm_and_add_program(&data_wr_program, &pio[DATA_WR], &sm[DATA_WR], &offset[DATA_WR]);
-	log_init(DATA_WR);
+	s &= pio_claim_free_sm_and_add_program(&data_wr_program, &pio[PIO_WR], &sm[PIO_WR], &offset[PIO_WR]);
+	log_init(PIO_WR);
 	hard_assert(s);
-	data_wr_program_init(pio[DATA_WR], sm[DATA_WR], offset[DATA_WR]);
+	data_wr_program_init(pio[PIO_WR], sm[PIO_WR], offset[PIO_WR]);
 
 	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	pio_sm_set_enabled(pio[PIO_CLK], sm[PIO_CLK], true); 	
 	sleep_ms(10);
-	pio_sm_set_enabled(pio[DATA_WR], sm[DATA_WR], true); 	
+	pio_sm_set_enabled(pio[PIO_WR], sm[PIO_WR], true); 	
 	
     while (true) {
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
 		printf("Hello\n");
-	s	sleep_ms(DELAY_MS);
+		sleep_ms(DELAY_MS);
     }
 }

@@ -1,7 +1,11 @@
 .program data_wr
 
+.define PUBLIC CTRL_READY_PIN 19
+.define PUBLIC BUS_CLK_PIN 28
+.define PUBLIC DATA_WR_W 18
+
 ; send data from rpi to hw, writes both ctrl and data bus 
-' expected to be running at 2xBUS_CLK freq
+; expected to be running at 2xBUS_CLK freq
 
 ; will use auto pulling from the tx fifo to write to the gpio
 ; if the fifo is empty pull should block
@@ -10,13 +14,13 @@
 
 ; write X scratch register content, will be read to the OSR during blocking
 ; -> set to all 0s 
-.init_state:
+init_state:
 	set x, 0
 
 ; wait for ready 
 ; then read config and data from the fifo ( streamed from dma )
 ; if no data is available write then content of X scratch
-.wr:
+wr:
 .wrap_target
 	wait 1 gpio CTRL_READY_PIN [1]
 	wait 0 gpio BUS_CLK_PIN 
@@ -26,7 +30,7 @@
 % c-sdk {
 
 static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
-	uint8_t i;
+	uint i;
 	pio_sm_config c = bus_clk_program_get_default_config(offset);
 
 	// enable pins, connect to pio
@@ -34,7 +38,7 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
 		pio_gpio_init(pio, i);
 	}
 	pio_sm_set_consecutive_pindirs(pio, sm, DATA_BASE_PIN, DATA_W, true);
-	for(uint8_t i=CTRL_DATA_BASE_PIN; i < CTRL_DATA_BASE_PIN + CTRL_DATA_W; i++){ // ctrl data
+	for(uint i=CTRL_DATA_BASE_PIN; i < CTRL_DATA_BASE_PIN + CTRL_DATA_W; i++){ // ctrl data
 		pio_gpio_init(pio, i);
 	}
 	pio_sm_set_consecutive_pindirs(pio, sm, CTRL_DATA_BASE_PIN, CTRL_DATA_W, true);
@@ -45,10 +49,10 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
 	
 
 	// join fifo's for one large fifo since sm is tx only
-	sm_config_set_fifo_join(c, PIO_FIFO_JOIN_TX);
+	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
 	// enable fifo autopull and set threashold (32)
-	sm_config_get_out_shift(c, true, true, DATA_WR_W);
+	sm_config_set_out_shift(&c, true, true, DATA_WR_W);
  
 	// clear fifo's
 	pio_sm_clear_fifos(pio, sm);	
