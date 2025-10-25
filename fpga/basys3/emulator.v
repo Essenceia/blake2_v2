@@ -142,16 +142,13 @@ endgenerate
 /* debug leds */
 
 
-assign led[0] = rst_async;
-assign led[1] = rst_n_d1_q;
-assign led[2] = pll_lock_q;
-assign led[3] = clk_ibuf; /* raw clk, help confirm wiring */
-assign led[4] = error;
-assign led[5] = ena;
+assign led[0] = rst_n_d1_q;
+assign led[1] = ena;
+assign led[2] = error;
 
-assign led[13:6] = ui_in; /* help debug RPI PIO code */
+assign led[10:3] = ui_in; /* help debug RPI PIO code */
 
-assign led[15:14] =  loopback_ctrl_q; 
+assign led[15:11] =  {hash_ctrl, data_ctrl_q}; 
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
