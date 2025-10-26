@@ -21,10 +21,10 @@ start:
 .wrap_target
 	wait 1 gpio CTRL_READY_PIN [1]
 	wait 0 gpio BUS_CLK_PIN
-	jump !OSRE start
+	jmp !OSRE start
 wr:
 	out pins, 32
-	jump !OSRE wr
+	jmp !OSRE wr
 	set pins, 0 
 .wrap
 
