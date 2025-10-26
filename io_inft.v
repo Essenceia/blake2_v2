@@ -21,8 +21,8 @@ module byte_size_config(
 
 	reg       unused_cfg_cnt_q;
 	reg [3:0]  cfg_cnt_q; 
-	reg [5:0]  kk_q, nn_q;
-	reg [63:0] ll_q;
+	(* MARK_DEBUG = "true" *) reg [5:0]  kk_q, nn_q;
+	(* MARK_DEBUG = "true" *) reg [63:0] ll_q;
 	wire       config_v; 
 	wire       config_n_v; 
 

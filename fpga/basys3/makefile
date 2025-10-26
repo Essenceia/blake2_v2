@@ -1,9 +1,14 @@
 SHELL := /bin/bash
 
+ifndef debug
+#debug := 
+endif 
+
 VIVADO_PRJ_DIR=emulator
 VIVADO_PRJ_NAME=$(VIVADO_PRJ_DIR)
 VIVADO_PRJ_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME).xpr
 VIVADO_CHECKPOINT_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME)_checkpoint.dcp
+VIVADO_DEBUG_PROBE_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME)_debug_probes.ltx
 
 VIVADO_CMD=vivado -mode batch -source
 
@@ -23,7 +28,7 @@ $(VIVADO_PRJ_PATH): setup.tcl
 setup: $(VIVADO_PRJ_PATH) 
 
 $(VIVADO_CHECKPOINT_PATH): $(VIVADO_PRJ_PATH) $(wildcard *.xdc) $(wildcard $(SRC_PATH)/*.v) $(wildcard ${UTILS_PATH}/*.v) $(wildcard *.v)
-	$(VIVADO_CMD) build.tcl -tclargs $(VIVADO_PRJ_PATH) $(VIVADO_CHECKPOINT_PATH)
+	$(VIVADO_CMD) build.tcl -tclargs $(VIVADO_PRJ_PATH) $(VIVADO_CHECKPOINT_PATH) $(debug) $(VIVADO_DEBUG_PROBE_PATH) 
 
 build: $(VIVADO_CHECKPOINT_PATH)
 

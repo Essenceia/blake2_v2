@@ -1,5 +1,7 @@
 set project_path [lindex $argv 0]
 set checkpoint_path [lindex $argv 1]
+set enable_debug_core [lindex $argv 2]
+set debug_probes_path [lindex $argv 3]
 puts "Implementation script called with project path $project_path, generating checkpoint at $checkpoint_path"
 
 open_project $project_path 
@@ -7,15 +9,21 @@ open_project $project_path
 # synth
 synth_design -top emulator
 
-source debug_probes.tcl
+if $enable_debug_core {
+	source debug_core.tcl
+} 
 
 # implement
 opt_design
 place_design
 route_design
 phys_opt_design
-
 report_timing_summary -no_detailed_paths
+
+if $enable_debug_core {
+	write_debug_probes -force $debug_probes_path
+	report_debug_core
+}
 
 write_checkpoint $checkpoint_path -force 
 close_project
