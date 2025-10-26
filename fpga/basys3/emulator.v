@@ -30,15 +30,15 @@ wire rst_async;
 reg rst_n_q, rst_n_d1_q;
 wire error;
  
-(* mark_debug = "true" *) wire [7:0] ui_in;
-(* mark_debug = "true" *) wire [7:0] uo_out; 
-(* mark_debug = "true" *) wire [7:0] uio_in; 
-wire [7:0] uio_out;
+wire [7:0] ui_in;
+wire [7:0] uo_out; 
+wire [7:0] uio_in; 
+(* MARK_DEBUG = "true" *) wire [7:0] uio_out;
 wire [7:0] uio_oe;
 wire [SWITCH_W-1:0] switch;
 wire [LED_W-1:0] led;
 
-(* mark_debug = "true" *) wire [PMOD_W-1:0] data;
+wire [PMOD_W-1:0] data;
 reg [PMOD_W-1:0] data_bus_q, data_q;
 reg [PMOD_W-1:0] hash_bus_q, hash_q;
 reg [2:0] data_ctrl_bus_q, data_ctrl_q;
@@ -148,7 +148,7 @@ assign led[2] = error;
 
 assign led[10:3] = ui_in; /* help debug RPI PIO code */
 
-assign led[15:11] =  {hash_ctrl, data_ctrl_q}; 
+assign led[15:11] =  uio_in | uio_out;//loopback[0]  ready data_cmd[1:0] valid 
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
