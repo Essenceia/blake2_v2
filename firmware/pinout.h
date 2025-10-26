@@ -16,9 +16,13 @@ typedef struct __attribute__((packed)) {
 	uint8_t data_cmd_i : 2;
 	uint8_t ready_o : 1;
 	uint8_t loopback_mode_i : 2; 
-	uint8_t unusued : 1; 
+	uint8_t unusued : 1;
+	uint8_t padding : 3; /* rpi-pico doesn't expose pins in order, after gpio 22 the next pin is gpio 26 */ 
 	uint8_t hash_valid_o : 1;
+	uint8_t padding1 : 5;	
 } pinout_t;
+
+_Static_assert(sizeof(pinout_t) == (32/8));
 
 /* data */ 
 #define DATA_MASK (uint32_t) 0xFF

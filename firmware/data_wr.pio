@@ -19,9 +19,9 @@
 ; if no data is available write then content of X scratch
 start:
 .wrap_target
-	wait 1 gpio CTRL_READY_PIN [1]
-	wait 0 gpio BUS_CLK_PIN
-	jmp !OSRE start
+	wait 1 gpio CTRL_READY_PIN
+	pull block
+	wait 1 gpio BUS_CLK_PIN
 wr:
 	out pins, 32
 	jmp !OSRE wr

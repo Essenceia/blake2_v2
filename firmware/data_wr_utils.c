@@ -17,7 +17,7 @@ void config_to_pinout(config_t *c, pinout_t **p, size_t pl)
 }
 
 /* set up dma stream of data to pio */
-void write_pinout_stream(pinout_t **p, size_t pl)
+void start_dma_pinout_stream(pinout_t **p, size_t pl)
 {
 
 }
