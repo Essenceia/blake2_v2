@@ -1,8 +1,7 @@
 .program data_wr
 
 .define PUBLIC CTRL_READY_PIN 19
-.define PUBLIC BUS_CLK_PIN 28
-.define PUBLIC DATA_WR_W 18
+.define PUBLIC BUS_CLK_PIN    28
 
 ; send data from rpi to hw, writes both ctrl and data bus 
 ; expected to be running at 2xBUS_CLK freq
@@ -14,17 +13,19 @@
 
 ; write X scratch register content, will be read to the OSR during blocking
 ; -> set to all 0s 
-init_state:
-	set x, 0
 
 ; wait for ready 
 ; then read config and data from the fifo ( streamed from dma )
 ; if no data is available write then content of X scratch
-wr:
+start:
 .wrap_target
 	wait 1 gpio CTRL_READY_PIN [1]
-	wait 0 gpio BUS_CLK_PIN 
-	out pins, DATA_WR_W [1]
+	wait 0 gpio BUS_CLK_PIN
+	jump !OSRE start
+wr:
+	out pins, 32
+	jump !OSRE wr
+	set pins, 0 
 .wrap
 
 % c-sdk {
@@ -52,8 +53,13 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
 	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
 	// enable fifo autopull and set threashold (32)
-	sm_config_set_out_shift(&c, true, true, DATA_WR_W);
- 
+	sm_config_set_out_shift(&c, true, true, 32);
+
+	// set "set" instruction base pin offset to ctrl bit to overcome the 
+	// 5b wide wright limitation
+	_Static_assert(CTRL_BASE_PIN+5 > CTRL_VALID_PIN);
+	sm_config_set_set_pin_base(&c, CTRL_BASE_PIN); 
+
 	// clear fifo's
 	pio_sm_clear_fifos(pio, sm);	
 

@@ -31,10 +31,4 @@
 // side of data to write OUT, also used as autopull threshold
 #define DATA_WR_W CTRL_MODE1_PIN
 
-
-
-/* checking PIO defines and pinout values match */
-//__Static_assert((DATA_WR_CTRL_READY_PIN) == CTRL_READY_PIN)
-//__Static_assert(DATA_WR_BUS_CLK_PIN == BUS_CLK_PIN)
-//__Static_assert(DATA_WR_DATA_WR_W == DATA_WR_W)
 #endif //_PINNOUT_H

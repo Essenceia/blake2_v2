@@ -1,11 +1,12 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
+#include "pinout.h" 
+#include "pinout_pio_match.h" 
+
 #include "hardware/clocks.h"
 #include "hardware/pio.h"
 #include "loopback.pio.h"
 #include "bus_clk.pio.h"
-
-#include "pinout.h" 
 #include "data_wr.pio.h"
 
 #define DELAY_MS 1000
