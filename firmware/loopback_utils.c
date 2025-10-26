@@ -32,7 +32,7 @@ void init_loopback_data_hash_bus(){
 	for(x= DATA_BASE_PIN; x < DATA_BASE_PIN+DATA_W; x++) {
 		gpio_init(x);
 		gpio_set_dir(x, GPIO_OUT);
-		gpio_set_drive_strength(x, GPIO_DRIVE_STRENGTH_12MA);	
+		//gpio_set_drive_strength(x, GPIO_DRIVE_STRENGTH_12MA);	
 		gpio_pull_down(x);	
 	}
 	for(x= HASH_BASE_PIN; x < HASH_BASE_PIN+DATA_W; x++) {
@@ -58,6 +58,7 @@ void test_data_loopback(uint32_t loops, uint32_t delay_ms)
 		/* write data, use current time as pseudo random data */ 
 		rand = time_us_32();
 		data_wr = DATA_MASK & rand; 
+
 		for (uint i = 0; i < DATA_W; i++)
 			gpio_put(i, (data_wr >> i) & 0x1);
 		//gpio_put_masked(DATA_MASK, data_wr);
@@ -69,7 +70,7 @@ void test_data_loopback(uint32_t loops, uint32_t delay_ms)
 		for(uint8_t w=0,x=HASH_BASE_PIN; x< HASH_BASE_PIN+DATA_W; x++,w++)
 			data_rd |= gpio_get(x) << w;
 
-		if (data_rd == data_wr ) printf("["__FILE__"] data match 0x0%2x\n", data_wr);	
-		else printf("["__FILE__" data missmatch wr:0x%02x, rd:0x%02x (raw:0x%08x)\n", data_wr, data_rd, data_rd_raw);	
+		if (data_rd == data_wr ) printf("["__FILE__"] data match 0x%02x\n", data_wr);	
+		else printf("["__FILE__" data missmatch :) wr:0x%02x, rd:0x%02x (raw:0x%08x)\n", data_wr, data_rd, data_rd_raw);	
 	}
 }

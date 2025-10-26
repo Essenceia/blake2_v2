@@ -24,6 +24,7 @@ target_link_libraries(${project_name}
 	hardware_pio
 	hardware_clocks
 	hardware_timer
+	hardware_dma
 	)
 
 # enable usb
