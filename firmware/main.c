@@ -8,6 +8,7 @@
 #include "loopback.pio.h"
 #include "bus_clk.pio.h"
 #include "data_wr.pio.h"
+#include "data_wr_utils.h" 
 
 #define DELAY_MS 1000
 
@@ -64,7 +65,11 @@ int main() {
 	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	pio_sm_set_enabled(pio[PIO_CLK], sm[PIO_CLK], true); 	
 	sleep_ms(10);
-	pio_sm_set_enabled(pio[PIO_WR], sm[PIO_WR], true); 	
+	pio_sm_set_enabled(pio[PIO_WR], sm[PIO_WR], true); 
+
+	/* data wr */ 
+	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);
+	send_config(0xde, 0xad, 0xbeafbeaf, wr_dma_chan);	
 	
     while (true) {
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
