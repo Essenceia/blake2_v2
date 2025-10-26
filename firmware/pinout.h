@@ -9,6 +9,17 @@
 #define HASH_BASE_PIN 8
 #define CTRL_BASE_PIN 16
 
+typedef struct __attribute__((packed)) {
+	uint8_t data_i;
+	uint8_t hash_o;
+	uint8_t valid_i : 1;
+	uint8_t data_cmd_i : 2;
+	uint8_t ready_o : 1;
+	uint8_t loopback_mode_i : 2; 
+	uint8_t unusued : 1; 
+	uint8_t hash_valid_o : 1;
+} pinout_t;
+
 /* data */ 
 #define DATA_MASK (uint32_t) 0xFF
 
@@ -21,6 +32,11 @@
 
 #define CTRL_READY_PIN      (CTRL_BASE_PIN+3)
 #define CTRL_HASH_VALID_PIN (CTRL_BASE_PIN+7)
+
+#define CTRL_DATA_CMD_CTRL  0x0
+#define CTRL_DATA_CMD_START 0x1
+#define CTRL_DATA_CMD_DATA  0x2
+#define CTRL_DATA_CMD_LAST  0x3
 
 /* loopback mode ctrl */ 
 #define CTRL_LOOPBACK_DATA (uint32_t) 0x10 

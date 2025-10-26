@@ -29,7 +29,6 @@ wr:
 .wrap
 
 % c-sdk {
-
 static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
 	uint i;
 	pio_sm_config c = bus_clk_program_get_default_config(offset);
@@ -62,8 +61,6 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
 
 	// clear fifo's
 	pio_sm_clear_fifos(pio, sm);	
-
 }
-
 %}
 
