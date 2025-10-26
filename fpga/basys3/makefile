@@ -9,12 +9,12 @@ VIVADO_PRJ_NAME=$(VIVADO_PRJ_DIR)
 VIVADO_PRJ_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME).xpr
 VIVADO_CHECKPOINT_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME)_checkpoint.dcp
 VIVADO_DEBUG_PROBE_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME)_debug_probes.ltx
+VIVADO_BIT_PATH=$(VIVADO_PRJ_DIR)/$(VIVADO_PRJ_NAME).svf
 
 VIVADO_CMD=vivado -mode batch -source
 
 SRC_PATH=../..
 UTILS_PATH=../
-OUT_DIR=out
 
 
 .PHONY: setup build prog gui
@@ -32,11 +32,10 @@ $(VIVADO_CHECKPOINT_PATH): $(VIVADO_PRJ_PATH) $(wildcard *.xdc) $(wildcard $(SRC
 
 build: $(VIVADO_CHECKPOINT_PATH)
 
-$(OUT_DIR)/$(VIVADO_PRJ_NAME).svf: $(VIVADO_CHECKPOINT_PATH) 
-	mkdir -p $(OUT_DIR)
-	$(VIVADO_CMD) program.tcl -tclargs $(VIVADO_CHECKPOINT_PATH) $(OUT_DIR)
+$(VIVADO_BIT_PATH): $(VIVADO_CHECKPOINT_PATH) 
+	$(VIVADO_CMD) program.tcl -tclargs $(VIVADO_CHECKPOINT_PATH) $(VIVADO_PRJ_DIR)
 
-prog: $(OUT_DIR)/$(VIVADO_PRJ_NAME).svf
+prog: $(VIVADO_BIT_PATH)
 
 gui: $(VIVADO_CHECKPOINT_PATH)
 	vivado $(VIVADO_CHECKPOINT_PATH)
@@ -44,7 +43,6 @@ gui: $(VIVADO_CHECKPOINT_PATH)
 clean:
 	rm -rf .Xil 
 	rm -rf $(VIVADO_PRJ_DIR)
-	rm -rf $(OUT_DIR)
 	rm -f vivado*
 	rm -f webtalk*{log,jou}
 	rm -f usage_statistics_webtalk*{html,xml}

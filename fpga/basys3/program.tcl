@@ -1,12 +1,12 @@
 set checkpoint_path [lindex $argv 0]
 set out_dir [lindex $argv 1]
-puts "Programming script called with checkpoint path $checkpoint_path, generating bitsteam to $out_dir"
+puts "Programming script called with checkpoint path $checkpoint_path, generating bitsteam to $out_dir folder"
 
 open_checkpoint $checkpoint_path 
 
 set bin_path "$out_dir/[current_project]"
 
-puts "Writing bistream at $bin_path"
+puts "Writing bistream at $bin_path.bit"
 write_bitstream "$bin_path.bit" -force
 
 open_hw_manager
