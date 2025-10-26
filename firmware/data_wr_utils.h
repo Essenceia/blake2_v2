@@ -3,6 +3,8 @@
 
 #define CONFIG_W 10
 #include "pico/stdlib.h"
+#include "hardware/pio.h"
+#include "pinout.h"
 
 typedef struct __attribute__((packed)) {
 	uint8_t nn;
