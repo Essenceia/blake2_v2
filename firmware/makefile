@@ -7,7 +7,7 @@ SRC:=$(wildcard *.c) $(wildcard *.h) $(wildcard *.pio)
 GDB_SERVER_ADDR:=localhost
 #endif
 
-GDB_SERVER_PORT:3333
+GDB_SERVER_PORT:=3333
 
 ${BUILD_DIR}: CMakeLists.txt
 	PROJECT_NAME=${PROJECT_NAME} cmake -S . ${BUILD_DIR}
@@ -32,7 +32,7 @@ debug:
 
 #start gdb, hook up to debug server started by openocd
 gdb:
-	gdb -ex "target remote ${GDB_SERVER_PORT}:${GDB_SERVER_PORT}"
+	gdb -ex "target remote ${GDB_SERVER_ADDR}:${GDB_SERVER_PORT}"
 
 clean:
 	yes | rm -rf ${BUILD_DIR}
