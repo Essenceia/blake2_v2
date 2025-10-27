@@ -5,6 +5,8 @@
 
 #include "hardware/clocks.h"
 #include "hardware/pio.h"
+#include "hardware/dma.h"
+
 #include "loopback.pio.h"
 #include "bus_clk.pio.h"
 #include "data_wr.pio.h"
@@ -20,6 +22,10 @@
 
 #define PICO_SYS_CLK_HW 200000000 // 200 MHz
 #define BUS_CLK_FREQ_HZ (float) 40000000.0 // 40 MHz
+
+#define _DMA_BASE (uint32_t) 0x50000000
+#define TC_OFF   (uint32_t) 0x008
+#define TRANSFER_COUNT_ADDR (_DMA_BASE + TC_OFF)
 
 #define log_init(PIO_IDX) printf(#PIO_IDX " init sucess %d:{%d:%d}", s, sm[PIO_IDX], offset[PIO_IDX]);
 int main() {
@@ -60,21 +66,24 @@ int main() {
 	s &= pio_claim_free_sm_and_add_program(&data_wr_program, &pio[PIO_WR], &sm[PIO_WR], &offset[PIO_WR]);
 	log_init(PIO_WR);
 	hard_assert(s);
-	data_wr_program_init(pio[PIO_WR], sm[PIO_WR], offset[PIO_WR]);
+	data_wr_program_init(pio[PIO_WR], sm[PIO_WR], offset[PIO_WR], clk_div);
 
 	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
-	pio_sm_set_enabled(pio[PIO_CLK], sm[PIO_CLK], true); 	
-	sleep_ms(10);
-	pio_sm_set_enabled(pio[PIO_WR], sm[PIO_WR], true); 
+	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
+	pio_enable_sm_mask_in_sync(pio[PIO_CLK], 1 << sm[PIO_CLK] | 1 << sm[PIO_WR]);
 
 	/* data wr */ 
 	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);
 	send_config(0xde, 0xad, 0xbeafbeaf, wr_dma_chan);	
-	
+
+	uint32_t *tc = (uint32_t*)TRANSFER_COUNT_ADDR; 
     while (true) {
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
-		printf("Hello\n");
+		printf("DMA channel busy %d wr PIO TX FIFO lvl %d trans count %d\n",
+			dma_channel_is_busy(wr_dma_chan),
+			pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]), 
+			*tc);
 		sleep_ms(DELAY_MS);
     }
 }
