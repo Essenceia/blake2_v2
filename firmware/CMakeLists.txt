@@ -12,7 +12,11 @@ pico_sdk_init()
 FILE(GLOB c_code_src *.c *.h)
 FILE(GLOB pio_code_src *.pio)
 
-message(STATUS "c code src " ${c_code_src})
+# debug 
+set(CMAKE_BUILD_TYPE Debug)
+set(PICO_DEOPTIMIZED_DEBUG 1)
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g3" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3" CACHE STRING "" FORCE)
 
 add_executable(${project_name})
 
@@ -25,6 +29,7 @@ target_link_libraries(${project_name}
 	hardware_clocks
 	hardware_timer
 	hardware_dma
+	pico_base_headers
 	)
 
 # enable usb

@@ -12,6 +12,8 @@
 #include "data_wr.pio.h"
 #include "data_wr_utils.h" 
 
+#include "hardware/structs/dma_debug.h"
+
 #define DELAY_MS 1000
 
 #define PIO_N 3 // number of PIO SM used
@@ -34,6 +36,9 @@ int main() {
 	uint offset[PIO_N];
 	float clk_div; 
 	uint led = 1;
+
+	dma_debug_hw_t *debug_dma;
+	debug_dma = dma_debug_hw;
 
 	// set system clk
 	set_sys_clock_hz(PICO_SYS_CLK_HW, true);
@@ -70,14 +75,23 @@ int main() {
 
 	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
-	pio_enable_sm_mask_in_sync(pio[PIO_CLK], 1 << sm[PIO_CLK] | 1 << sm[PIO_WR]);
+	pio_enable_sm_mask_in_sync(pio[PIO_CLK], 1u << sm[PIO_CLK] | 1u << sm[PIO_WR]);
 
 	/* data wr */ 
 	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);
 	send_config(0xde, 0xad, 0xbeafbeaf, wr_dma_chan);	
 
 	uint32_t *tc = (uint32_t*)TRANSFER_COUNT_ADDR; 
+	uint fifo_lvl;
+	bool stalled;
+	uint8_t pio_pc;
+
     while (true) {
+		/* debug */
+		fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]); 
+		stalled = pio_sm_is_exec_stalled(pio[PIO_WR], sm[PIO_WR]);
+		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
+
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
 		printf("DMA channel busy %d wr PIO TX FIFO lvl %d trans count %d\n",

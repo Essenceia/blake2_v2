@@ -17,17 +17,15 @@
 ; wait for ready 
 ; then read config and data from the fifo ( streamed from dma )
 ; if no data is available write then content of X scratch
-	set pins, 1
-	set x, 1
 start:
 .wrap_target
+	set pins, 0 
 	wait 1 gpio CTRL_READY_PIN
 	pull block
 	wait 0 gpio BUS_CLK_PIN
 wr:
 	out pins, 32
 	jmp !OSRE wr
-	set pins, 1 
 .wrap
 
 % c-sdk {
@@ -65,6 +63,9 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	// 5b wide wright limitation
 	_Static_assert(CTRL_BASE_PIN+5 > CTRL_VALID_PIN);
 	sm_config_set_set_pins(&c, CTRL_VALID_PIN, 4);
+
+	// set config
+	pio_sm_init(pio, sm, offset, &c); 
 
 	// clear fifo's
 	pio_sm_clear_fifos(pio, sm);	
