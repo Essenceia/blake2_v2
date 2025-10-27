@@ -2,10 +2,17 @@ BUILD_DIR:=artifact
 PROJECT_NAME:=blake2s_asic_firmeware
 SRC:=$(wildcard *.c) $(wildcard *.h) $(wildcard *.pio)
 
+# GDB server config, if variable is not defined when calling `make gdb` use localhost as default
+#ifndef GDB_SERVER_ADDR
+GDB_SERVER_ADDR:=localhost
+#endif
+
+GDB_SERVER_PORT:3333
+
 ${BUILD_DIR}: CMakeLists.txt
 	PROJECT_NAME=${PROJECT_NAME} cmake -S . ${BUILD_DIR}
 
-.PHONY: setup build flash
+.PHONY: setup build flash debug gdb
 
 setup: ${BUILD_DIR}
 
@@ -19,6 +26,13 @@ flash:
 serial:
 	picocom -q /dev/ttyACM0
 		
+# start openocd, will use openocd.cfg as config
+debug:
+	openocd
+
+#start gdb, hook up to debug server started by openocd
+gdb:
+	gdb -ex "target remote ${GDB_SERVER_PORT}:${GDB_SERVER_PORT}"
 
 clean:
 	yes | rm -rf ${BUILD_DIR}
