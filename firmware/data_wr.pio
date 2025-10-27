@@ -17,19 +17,21 @@
 ; wait for ready 
 ; then read config and data from the fifo ( streamed from dma )
 ; if no data is available write then content of X scratch
+	set pins, 1
+	set x, 1
 start:
 .wrap_target
 	wait 1 gpio CTRL_READY_PIN
 	pull block
-	wait 1 gpio BUS_CLK_PIN
+	wait 0 gpio BUS_CLK_PIN
 wr:
 	out pins, 32
 	jmp !OSRE wr
-	set pins, 0 
+	set pins, 1 
 .wrap
 
 % c-sdk {
-static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
+static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdiv){
 	uint i;
 	pio_sm_config c = bus_clk_program_get_default_config(offset);
 
@@ -47,6 +49,8 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
 	pio_sm_set_consecutive_pindirs(pio, sm, CTRL_READY_PIN, 1, false); // input pin, technically not needed to be set for input
 	pio_sm_set_consecutive_pindirs(pio, sm, BUS_CLK_PIN, 1, false); // pin already init by bus clk pio
 	
+	// set clk freq 
+	pio_sm_set_clkdiv(pio, sm, fdiv);
 
 	// join fifo's for one large fifo since sm is tx only
 	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
@@ -54,10 +58,13 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset){
 	// enable fifo autopull and set threashold (32)
 	sm_config_set_out_shift(&c, true, true, 32);
 
+	//set "out" instruction to cover the entire gpio range
+	sm_config_set_out_pins(&c, 0, 32);
+
 	// set "set" instruction base pin offset to ctrl bit to overcome the 
 	// 5b wide wright limitation
 	_Static_assert(CTRL_BASE_PIN+5 > CTRL_VALID_PIN);
-	sm_config_set_set_pin_base(&c, CTRL_BASE_PIN); 
+	sm_config_set_set_pins(&c, CTRL_VALID_PIN, 4);
 
 	// clear fifo's
 	pio_sm_clear_fifos(pio, sm);	
