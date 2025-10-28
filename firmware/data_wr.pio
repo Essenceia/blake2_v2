@@ -47,9 +47,6 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	pio_sm_set_consecutive_pindirs(pio, sm, CTRL_READY_PIN, 1, false); // input pin, technically not needed to be set for input
 	pio_sm_set_consecutive_pindirs(pio, sm, BUS_CLK_PIN, 1, false); // pin already init by bus clk pio
 	
-	// set clk freq 
-	pio_sm_set_clkdiv(pio, sm, fdiv);
-
 	// join fifo's for one large fifo since sm is tx only
 	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
@@ -66,6 +63,9 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 
 	// set config
 	pio_sm_init(pio, sm, offset, &c); 
+
+	// set clk freq 
+	pio_sm_set_clkdiv(pio, sm, fdiv);
 
 	// clear fifo's
 	pio_sm_clear_fifos(pio, sm);	

@@ -87,7 +87,7 @@ int main() {
 	bool stalled;
 	uint8_t pio_pc;
 	pio_hw_t *debug_pio;
-	debug_pio = PIO_INSTANCE(0);
+	debug_pio = PIO_INSTANCE(1);
 
     while (true) {
 		/* debug */
