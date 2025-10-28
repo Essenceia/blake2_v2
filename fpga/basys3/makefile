@@ -28,7 +28,7 @@ $(VIVADO_PRJ_PATH): setup.tcl
 setup: $(VIVADO_PRJ_PATH) 
 
 $(VIVADO_CHECKPOINT_PATH): $(VIVADO_PRJ_PATH) $(wildcard *.xdc) $(wildcard $(SRC_PATH)/*.v) $(wildcard ${UTILS_PATH}/*.v) $(wildcard *.v)
-	$(VIVADO_CMD) build.tcl -tclargs $(VIVADO_PRJ_PATH) $(VIVADO_CHECKPOINT_PATH) $(debug) $(VIVADO_DEBUG_PROBE_PATH) 
+	$(VIVADO_CMD) build.tcl -tclargs $(VIVADO_PRJ_PATH) $(VIVADO_CHECKPOINT_PATH) $(if $(debug), $(debug) $(VIVADO_DEBUG_PROBE_PATH) )
 
 build: $(VIVADO_CHECKPOINT_PATH)
 
