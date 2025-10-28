@@ -13,6 +13,7 @@
 #include "data_wr_utils.h" 
 
 #include "hardware/structs/dma_debug.h"
+#include "hardware/structs/pio.h"
 
 #define DELAY_MS 1000
 
@@ -75,7 +76,7 @@ int main() {
 
 	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
-	pio_enable_sm_mask_in_sync(pio[PIO_CLK], 1u << sm[PIO_CLK] | 1u << sm[PIO_WR]);
+	pio_enable_sm_mask_in_sync(pio[PIO_CLK], 1u << sm[PIO_LED] | 1u << sm[PIO_CLK] | 1u << sm[PIO_WR]);
 
 	/* data wr */ 
 	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);
@@ -85,6 +86,8 @@ int main() {
 	uint fifo_lvl;
 	bool stalled;
 	uint8_t pio_pc;
+	pio_hw_t *debug_pio;
+	debug_pio = PIO_INSTANCE(0);
 
     while (true) {
 		/* debug */
@@ -98,6 +101,7 @@ int main() {
 			dma_channel_is_busy(wr_dma_chan),
 			pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]), 
 			*tc);
+		printf("PIO0 ctrl 0x%08x\n", debug_pio->ctrl);
 		sleep_ms(DELAY_MS);
     }
 }

@@ -32,7 +32,7 @@ debug:
 
 #start gdb, hook up to debug server started by openocd
 gdb:
-	gdb -ex "target remote ${GDB_SERVER_ADDR}:${GDB_SERVER_PORT}"
+	gdb -ex "target remote ${GDB_SERVER_ADDR}:${GDB_SERVER_PORT}" ${BUILD_DIR}/${PROJECT_NAME}.elf
 
 clean:
 	yes | rm -rf ${BUILD_DIR}
