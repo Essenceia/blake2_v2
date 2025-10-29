@@ -40,12 +40,13 @@ wire [LED_W-1:0] led;
 
 wire [PMOD_W-1:0] data;
 reg [PMOD_W-1:0] data_bus_q, data_q;
-reg [PMOD_W-1:0] hash_bus_q, hash_q;
 reg [2:0] data_ctrl_bus_q, data_ctrl_q;
-reg [1:0] hash_ctrl_bus_q, hash_ctrl_q;
 reg [1:0] loopback_ctrl_bus_q, loopback_ctrl_q;
+
 wire [PMOD_W-1:0] hash;
+reg  [PMOD_W-1:0] hash_bus_q;
 wire [1:0] hash_ctrl;
+reg  [1:0] hash_ctrl_bus_q;
 
 /* clk */
 IBUF m_ibuf_clk(
@@ -95,10 +96,8 @@ always @(posedge clk) begin
 end
 
 always @(posedge clk) begin
-	hash_ctrl_q     <= hash_ctrl;
-	hash_ctrl_bus_q <= hash_ctrl_q;
-	hash_q          <= hash;
-	hash_bus_q      <= hash_q;
+	hash_ctrl_bus_q  <= hash_ctrl;
+	hash_bus_q       <= hash;
 end
 
 
@@ -148,7 +147,9 @@ assign led[2] = error;
 
 assign led[10:3] = ui_in; /* help debug RPI PIO code */
 
-assign led[15:11] =  uio_in | uio_out;//loopback[0]  ready data_cmd[1:0] valid 
+assign led[13:11] =  uio_in[2:0];//data_cmd[1:0] valid 
+assign led[14] =  uio_out[3];//ready 
+assign led[15] =  uio_in[4];//loopback[0]  
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
