@@ -70,18 +70,21 @@ Scripts are provided to automatically the entire FPGA flow in the `fpga/basys3` 
 ```
 cd fpga/basys3
 ```
+
 Create the Vivado project :
 ```
 make setup
 ```
+
 Run synthesis and PnR :
 ```
 make build
 ```
+
 Write the bitstream over JTAG to the FPGA ( this doesn't write to the QSPI ):
 ```
 make prog
-``
+```
 
 ##### Debugging 
 
@@ -90,9 +93,11 @@ design for all signals with the `mark_debug` property and automatically :
 - create a ILA debug core
 - connect all signals marked for debug to it
 To invoke this debug mode, call make with the `debug=1` argument : 
+
 ```
 make build debug=1
 ```
+
 Or to both build and flash :
 ```
 make prog debug=1
