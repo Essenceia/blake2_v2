@@ -29,6 +29,7 @@ _Static_assert(sizeof(pinout_t) == (32/8));
 
 /* data ctrl */
 #define CTRL_DATA_W 3
+#define CTRL_DATA_MASK (uint32_t) 0x7
 #define CTRL_DATA_BASE_PIN CTRL_BASE_PIN
 #define CTRL_VALID_PIN CTRL_DATA_BASE_PIN 
 #define CTRL_MODE0_PIN CTRL_DATA_BASE_PIN+1

@@ -1,5 +1,6 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "pinout.h" 
 #include "pinout_pio_match.h" 
 
@@ -37,9 +38,10 @@ int main() {
 	uint offset[PIO_N];
 	float clk_div; 
 	uint led = 1;
-
+	size_t pl = CONFIG_W;
 	dma_debug_hw_t *debug_dma;
 	debug_dma = dma_debug_hw;
+	pinout_t *const p = malloc(pl * sizeof(pinout_t));
 
 	// set system clk
 	set_sys_clock_hz(PICO_SYS_CLK_HW, true);
@@ -80,7 +82,12 @@ int main() {
 
 	/* data wr */ 
 	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);
-	send_config(0xde, 0xad, 0xbeafbeaf, wr_dma_chan);	
+	send_config(0xde, 0xad, 0xbeafbeafdeadbeaf, wr_dma_chan, p, pl);	
+
+
+	/* debug gpio read 19 */ 
+	//gpio_init(19);
+	//gpio_set_dir(19, GPIO_IN);
 
 	uint32_t *tc = (uint32_t*)TRANSFER_COUNT_ADDR; 
 	uint fifo_lvl;
@@ -88,13 +95,16 @@ int main() {
 	uint8_t pio_pc;
 	pio_hw_t *debug_pio;
 	debug_pio = PIO_INSTANCE(1);
+	//uint8_t gpio19;
 
     while (true) {
 		/* debug */
 		fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]); 
 		stalled = pio_sm_is_exec_stalled(pio[PIO_WR], sm[PIO_WR]);
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
+		//gpio19 = gpio_get(19);
 
+		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
 		printf("DMA channel busy %d wr PIO TX FIFO lvl %d trans count %d\n",

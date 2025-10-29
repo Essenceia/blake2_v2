@@ -18,11 +18,12 @@
 ; then read config and data from the fifo ( streamed from dma )
 ; if no data is available write then content of X scratch
 start:
+	set x, 0
+	out null, 32
 .wrap_target
-	set pins, 0 
-	wait 1 gpio CTRL_READY_PIN
-	pull block
-	wait 0 gpio BUS_CLK_PIN
+	set pins, 0
+	wait 1 pin 0 
+	wait 0 gpio BUS_CLK_PIN; 
 wr:
 	out pins, 32
 	jmp !OSRE wr
@@ -31,24 +32,12 @@ wr:
 % c-sdk {
 static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdiv){
 	uint i;
+	uint32_t pindirs = 0;// out = 1, in = 0
+	uint32_t pinmask = 0;
 	pio_sm_config c = bus_clk_program_get_default_config(offset);
 
-	// enable pins, connect to pio
-	for(i=DATA_BASE_PIN; i < DATA_BASE_PIN + DATA_W; i++){ // data
-		pio_gpio_init(pio, i);
-	}
-	pio_sm_set_consecutive_pindirs(pio, sm, DATA_BASE_PIN, DATA_W, true);
-	for(uint i=CTRL_DATA_BASE_PIN; i < CTRL_DATA_BASE_PIN + CTRL_DATA_W; i++){ // ctrl data
-		pio_gpio_init(pio, i);
-	}
-	pio_sm_set_consecutive_pindirs(pio, sm, CTRL_DATA_BASE_PIN, CTRL_DATA_W, true);
-
-	pio_gpio_init(pio, CTRL_READY_PIN);
-	pio_sm_set_consecutive_pindirs(pio, sm, CTRL_READY_PIN, 1, false); // input pin, technically not needed to be set for input
-	pio_sm_set_consecutive_pindirs(pio, sm, BUS_CLK_PIN, 1, false); // pin already init by bus clk pio
-	
 	// join fifo's for one large fifo since sm is tx only
-	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+	//sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
 	// enable fifo autopull and set threashold (32)
 	sm_config_set_out_shift(&c, true, true, 32);
@@ -59,11 +48,35 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	// set "set" instruction base pin offset to ctrl bit to overcome the 
 	// 5b wide wright limitation
 	_Static_assert(CTRL_BASE_PIN+5 > CTRL_VALID_PIN);
-	sm_config_set_set_pins(&c, CTRL_VALID_PIN, 4);
+	sm_config_set_set_pins(&c, CTRL_VALID_PIN, 3);
+
+	// in base, used in wait
+	sm_config_set_in_pins(&c, CTRL_READY_PIN);
 
 	// set config
 	pio_sm_init(pio, sm, offset, &c); 
 
+	// enable pins, connect to pio
+	for(i=DATA_BASE_PIN; i < DATA_BASE_PIN + DATA_W; i++){ // data
+		pio_gpio_init(pio, i);
+	}
+	pindirs |= DATA_MASK << DATA_BASE_PIN;
+	pinmask |= DATA_MASK << DATA_BASE_PIN;
+
+	for(uint i=CTRL_DATA_BASE_PIN; i < CTRL_DATA_BASE_PIN + CTRL_DATA_W; i++){ // ctrl data
+		pio_gpio_init(pio, i);
+	}
+	pinmask |= CTRL_DATA_MASK << CTRL_DATA_BASE_PIN;
+	pindirs |= CTRL_DATA_MASK << CTRL_DATA_BASE_PIN;
+
+	// no need to set pio function for input pins
+	gpio_init(CTRL_READY_PIN);
+	gpio_set_dir(CTRL_READY_PIN, GPIO_IN);
+	 
+	pinmask |= (uint32_t)0x1 << CTRL_READY_PIN;
+
+	pio_sm_set_pindirs_with_mask(pio, sm, pindirs, pinmask); 
+	
 	// set clk freq 
 	pio_sm_set_clkdiv(pio, sm, fdiv);
 

@@ -6,7 +6,7 @@
 ; since the taget frequency is lower ( 50MHz and less ) than the RP2040 system clk frequence 
 ; we can acheive by setting up the clk divider 
 
-	set pindirs, 1
+	set pindirs, 1 [1]
 .wrap_target
 	set pins, 1
 	set pins, 0

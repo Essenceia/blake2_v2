@@ -9,28 +9,24 @@ void config_to_pinout(config_t *c, pinout_t *p, size_t pl)
 	hard_assert(p);
 	hard_assert(pl*CONFIG_W >= sizeof(*c));
 	hard_assert(sizeof(flat) == sizeof(*c));
-	memcpy(flat, c, sizeof(flat));
+	memcpy(flat, c, sizeof(uint8_t)*CONFIG_W);
+	memset(p, 0, sizeof(pinout_t)*pl);
 	for(uint i=0; i < CONFIG_W; i++)
 	{
-		memset(&p[i], 0, sizeof(p[i]));
 		p[i].data_i = flat[i];
 		p[i].valid_i = 1; 
 		p[i].data_cmd_i = CTRL_DATA_CMD_CTRL;
 	}
 }
 
-void send_config(uint8_t nn, uint8_t kk, uint64_t ll, uint dma_chan)
+void send_config(uint8_t nn, uint8_t kk, uint64_t ll, uint dma_chan, pinout_t *p, size_t pl)
 {
-	pinout_t *p;
 	config_t c; 
 	c.nn = nn; 
 	c.kk = kk; 
 	c.ll = ll; 
-	// TODO allocate pinout memory in a dedicated and stable segment
-	// not freeing memory by design
-	p = malloc(CONFIG_W * sizeof(pinout_t));
-	config_to_pinout(&c, p, CONFIG_W);
-	start_wr_dma_pinout_stream(p, CONFIG_W,dma_chan);	
+	config_to_pinout(&c, p, pl);
+	start_wr_dma_pinout_stream(p, pl ,dma_chan);	
 }
 /* setup dma channel for writing 32b bursts to the PIO TX FIFO 
  * ! not configuring : 
