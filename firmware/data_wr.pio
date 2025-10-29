@@ -23,12 +23,12 @@
 ; if no data is available write then content of X scratch
 data_init:
 	set pins, 0
-	set x, 0 [1]
+	set x, 31 [1]
 	jmp offset+data_start
 data_wr:
 	out pins, 32
 	jmp !OSRE offset+data_wr
-	set pins, 0 [1]
+	set pins, 1 [1]
 .wrap_target
 data_start:
 	;wait 1 pin 0 

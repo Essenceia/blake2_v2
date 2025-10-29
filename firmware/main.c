@@ -24,8 +24,9 @@
 #define PIO_WR  2
 #define macro_str(x) #x
 
-#define PICO_SYS_CLK_HW 200000000 // 200 MHz
-#define BUS_CLK_FREQ_HZ (float) 40000000.0 // 40 MHz
+#define PICO_SYS_CLK_HW              200000000   // 200 MHz
+#define BUS_PIO_CLK_FREQ_HZ  (float) 160000000.0 // 160 MHz
+#define DATA_PIO_CLK_FREQ_HZ (float)  80000000.0 //  80 MHz
 
 #define _DMA_BASE (uint32_t) 0x50000000
 #define TC_OFF   (uint32_t) 0x008
@@ -65,7 +66,7 @@ int main() {
 		BUS_CLK_PIN, 1, true);
 	log_init(PIO_CLK);
 	hard_assert(s);
-	clk_div = (float)clock_get_hz(clk_sys) / (BUS_CLK_FREQ_HZ*2); 
+	clk_div = (float)clock_get_hz(clk_sys) / (BUS_PIO_CLK_FREQ_HZ); 
 	bus_clk_program_init(pio[PIO_CLK], sm[PIO_CLK], offset[PIO_CLK], BUS_CLK_PIN, clk_div);
 
 	gpio_set_drive_strength(BUS_CLK_PIN, GPIO_DRIVE_STRENGTH_12MA);
@@ -75,13 +76,14 @@ int main() {
 	s &= pio_claim_free_sm_and_add_program(&data_wr_program, &pio[PIO_WR], &sm[PIO_WR], &offset[PIO_WR]);
 	log_init(PIO_WR);
 	hard_assert(s);
+	clk_div = (float)clock_get_hz(clk_sys) / (DATA_PIO_CLK_FREQ_HZ); 
 	data_wr_program_init(pio[PIO_WR], sm[PIO_WR], offset[PIO_WR], clk_div);
 
 	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
-	uint32_t sm_mask = 1u << sm[PIO_LED] | 1u << sm[PIO_CLK] | 1u << sm[PIO_WR];
+	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR];
+	//pio_restart_sm_mask(pio[PIO_CLK], sm_mask);
 	pio_enable_sm_mask_in_sync(pio[PIO_CLK], sm_mask);
-	pio_restart_sm_mask(pio[PIO_CLK], sm_mask);
 
 	/* data wr */ 
 	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);

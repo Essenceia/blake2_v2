@@ -8,8 +8,8 @@
 
 	set pindirs, 1 [1]
 .wrap_target
-	set pins, 1
-	set pins, 0
+	set pins, 1 [1]
+	set pins, 0 [1]
 .wrap
 
 % c-sdk {
