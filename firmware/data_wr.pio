@@ -1,5 +1,9 @@
 .program data_wr
 
+.define offset 0
+.origin offset
+
+
 .define PUBLIC CTRL_READY_PIN 19
 .define PUBLIC BUS_CLK_PIN    28
 
@@ -17,16 +21,20 @@
 ; wait for ready 
 ; then read config and data from the fifo ( streamed from dma )
 ; if no data is available write then content of X scratch
-start:
-	set x, 0
-	out null, 32
-.wrap_target
+data_init:
 	set pins, 0
-	wait 1 pin 0 
-	wait 0 gpio BUS_CLK_PIN; 
-wr:
+	set x, 0 [1]
+	jmp offset+data_start
+data_wr:
 	out pins, 32
-	jmp !OSRE wr
+	jmp !OSRE offset+data_wr
+	set pins, 0 [1]
+.wrap_target
+data_start:
+	;wait 1 pin 0 
+	;wait 0 gpio BUS_CLK_PIN; 
+	pull noblock
+	jmp offset+data_wr
 .wrap
 
 % c-sdk {
@@ -81,7 +89,8 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	pio_sm_set_clkdiv(pio, sm, fdiv);
 
 	// clear fifo's
-	pio_sm_clear_fifos(pio, sm);	
+	pio_sm_clear_fifos(pio, sm);
+
 }
 %}
 

@@ -38,10 +38,11 @@ int main() {
 	uint offset[PIO_N];
 	float clk_div; 
 	uint led = 1;
+	pinout_t *p;
 	size_t pl = CONFIG_W;
 	dma_debug_hw_t *debug_dma;
 	debug_dma = dma_debug_hw;
-	pinout_t *const p = malloc(pl * sizeof(pinout_t));
+	p = malloc(pl * sizeof(pinout_t));
 
 	// set system clk
 	set_sys_clock_hz(PICO_SYS_CLK_HW, true);
@@ -78,11 +79,12 @@ int main() {
 
 	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
-	pio_enable_sm_mask_in_sync(pio[PIO_CLK], 1u << sm[PIO_LED] | 1u << sm[PIO_CLK] | 1u << sm[PIO_WR]);
+	uint32_t sm_mask = 1u << sm[PIO_LED] | 1u << sm[PIO_CLK] | 1u << sm[PIO_WR];
+	pio_enable_sm_mask_in_sync(pio[PIO_CLK], sm_mask);
+	pio_restart_sm_mask(pio[PIO_CLK], sm_mask);
 
 	/* data wr */ 
 	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);
-	send_config(0xde, 0xad, 0xbeafbeafdeadbeaf, wr_dma_chan, p, pl);	
 
 
 	/* debug gpio read 19 */ 
@@ -103,6 +105,7 @@ int main() {
 		stalled = pio_sm_is_exec_stalled(pio[PIO_WR], sm[PIO_WR]);
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
 		//gpio19 = gpio_get(19);
+		send_config(0xde, 0xad, 0x6789beafdeadbe45, wr_dma_chan, p, pl);	
 
 		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
