@@ -12,9 +12,11 @@
 #include "bus_clk.pio.h"
 #include "data_wr.pio.h"
 #include "data_wr_utils.h" 
+#include "pio_utils.h" 
 
 #include "hardware/structs/dma_debug.h"
 #include "hardware/structs/pio.h"
+#include "hardware/structs/sio.h"
 
 #define DELAY_MS 1000
 
@@ -25,8 +27,9 @@
 #define macro_str(x) #x
 
 #define PICO_SYS_CLK_HW              200000000   // 200 MHz
-#define BUS_PIO_CLK_FREQ_HZ  (float) 160000000.0 // 160 MHz
+#define BUS_PIO_CLK_FREQ_HZ  (float)  80000000.0 //  80 MHz
 #define DATA_PIO_CLK_FREQ_HZ (float)  80000000.0 //  80 MHz
+#define LED_PIO_CLK_FREQ_HZ  (float)  80000000.0 //  80 MHz
 
 #define _DMA_BASE (uint32_t) 0x50000000
 #define TC_OFF   (uint32_t) 0x008
@@ -40,9 +43,16 @@ int main() {
 	float clk_div; 
 	uint led = 1;
 	pinout_t *p;
+	bool s = true;
 	size_t pl = CONFIG_W;
+
+	/* debug hw */
 	dma_debug_hw_t *debug_dma;
 	debug_dma = dma_debug_hw;
+	sio_hw_t *debug_sio;
+	debug_sio = sio_hw;
+
+
 	p = malloc(pl * sizeof(pinout_t));
 
 	// set system clk
@@ -50,27 +60,9 @@ int main() {
 	
 	stdio_init_all();
 	
-	/* led */
-	bool s = pio_claim_free_sm_and_add_program_for_gpio_range(
-		&loopback_program, 
-		&pio[PIO_LED], &sm[PIO_LED], &offset[PIO_LED],
-		PICO_DEFAULT_LED_PIN, 1, true);
-	log_init(PIO_LED);
-	hard_assert(s);
-	loopback_program_init(pio[PIO_LED], sm[PIO_LED], offset[PIO_LED], PICO_DEFAULT_LED_PIN);	
 
-	/* bus clk */
-	s &= pio_claim_free_sm_and_add_program_for_gpio_range(
-		&bus_clk_program, 
-		&pio[PIO_CLK], &sm[PIO_CLK], &offset[PIO_CLK],
-		BUS_CLK_PIN, 1, true);
-	log_init(PIO_CLK);
-	hard_assert(s);
-	clk_div = (float)clock_get_hz(clk_sys) / (BUS_PIO_CLK_FREQ_HZ); 
-	bus_clk_program_init(pio[PIO_CLK], sm[PIO_CLK], offset[PIO_CLK], BUS_CLK_PIN, clk_div);
 
-	gpio_set_drive_strength(BUS_CLK_PIN, GPIO_DRIVE_STRENGTH_12MA);
-	gpio_set_slew_rate(BUS_CLK_PIN, GPIO_SLEW_RATE_FAST);
+
 
 	/* data wr */ 
 	s &= pio_claim_free_sm_and_add_program(&data_wr_program, &pio[PIO_WR], &sm[PIO_WR], &offset[PIO_WR]);
@@ -79,9 +71,28 @@ int main() {
 	clk_div = (float)clock_get_hz(clk_sys) / (DATA_PIO_CLK_FREQ_HZ); 
 	data_wr_program_init(pio[PIO_WR], sm[PIO_WR], offset[PIO_WR], clk_div);
 
-	/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
+	/* bus clk */
+	s &= pio_claim_free_sm_and_add_program_for_gpio_range(
+		&bus_clk_program, 
+		&pio[PIO_CLK], &sm[PIO_CLK], &offset[PIO_CLK],
+		BUS_CLK_PIN, 1, true);
+	log_init(PIO_CLK);
+	hard_assert(s);
+	//clk_div = (float)clock_get_hz(clk_sys) / (BUS_PIO_CLK_FREQ_HZ); 
+	bus_clk_program_init(pio[PIO_CLK], sm[PIO_CLK], offset[PIO_CLK], BUS_CLK_PIN, clk_div);
+	gpio_set_drive_strength(BUS_CLK_PIN, GPIO_DRIVE_STRENGTH_12MA);
+	gpio_set_slew_rate(BUS_CLK_PIN, GPIO_SLEW_RATE_FAST);
+
+	/* led */
+	s = allocate_prog_pio(0, &pio[PIO_LED], &sm[PIO_LED], &offset[PIO_LED], &loopback_program);
+	log_init(PIO_LED);
+	hard_assert(s);
+	//clk_div = (float)clock_get_hz(clk_sys) / (LED_PIO_CLK_FREQ_HZ); 
+	loopback_program_init(pio[PIO_LED], sm[PIO_LED], offset[PIO_LED], PICO_DEFAULT_LED_PIN, clk_div);	
+	
+/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
-	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR];
+	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR] | 1u << sm[PIO_LED];;
 	//pio_restart_sm_mask(pio[PIO_CLK], sm_mask);
 	pio_enable_sm_mask_in_sync(pio[PIO_CLK], sm_mask);
 
@@ -102,12 +113,16 @@ int main() {
 	//uint8_t gpio19;
 
     while (true) {
+		sleep_ms(DELAY_MS);
+		
 		/* debug */
 		fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]); 
 		stalled = pio_sm_is_exec_stalled(pio[PIO_WR], sm[PIO_WR]);
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
 		//gpio19 = gpio_get(19);
-		send_config(0xde, 0xad, 0x6789beafdeadbe45, wr_dma_chan, p, pl);	
+	
+		/* config */
+		send_config(0x00, 0xff, 0x0, wr_dma_chan, p, pl);	
 
 		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);

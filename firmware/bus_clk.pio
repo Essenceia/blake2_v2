@@ -8,8 +8,8 @@
 
 	set pindirs, 1 [1]
 .wrap_target
-	set pins, 1 [1]
-	set pins, 0 [1]
+	set pins, 1 
+	set pins, 0
 .wrap
 
 % c-sdk {
@@ -21,7 +21,11 @@ static inline void bus_clk_program_init(PIO pio, uint sm , uint offset, uint pin
 	
 	// connect pio pin driver to gpio pad
 	pio_gpio_init(pio, pin);
+    gpio_set_drive_strength(pin, GPIO_DRIVE_STRENGTH_12MA);
+	gpio_set_pulls(pin, false, true);	
+	gpio_set_slew_rate(pin, GPIO_SLEW_RATE_FAST);
 
+ 
 	// set pindir to output 
 	pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 

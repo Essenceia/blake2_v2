@@ -28,10 +28,10 @@ data_init:
 data_wr:
 	out pins, 32
 	jmp !OSRE offset+data_wr
-	set pins, 1 [1]
+	set pins, 0 [1]
 .wrap_target
 data_start:
-	;wait 1 pin 0 
+	wait 1 gpio CTRL_READY_PIN
 	;wait 0 gpio BUS_CLK_PIN; 
 	pull noblock
 	jmp offset+data_wr
@@ -42,7 +42,7 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	uint i;
 	uint32_t pindirs = 0;// out = 1, in = 0
 	uint32_t pinmask = 0;
-	pio_sm_config c = bus_clk_program_get_default_config(offset);
+	pio_sm_config c = data_wr_program_get_default_config(offset);
 
 	// join fifo's for one large fifo since sm is tx only
 	//sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
@@ -78,9 +78,10 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	pindirs |= CTRL_DATA_MASK << CTRL_DATA_BASE_PIN;
 
 	// no need to set pio function for input pins
-	gpio_init(CTRL_READY_PIN);
+	pio_gpio_init(pio,CTRL_READY_PIN);
 	gpio_set_dir(CTRL_READY_PIN, GPIO_IN);
-	 
+	gpio_disable_pulls(CTRL_READY_PIN);
+
 	pinmask |= (uint32_t)0x1 << CTRL_READY_PIN;
 
 	pio_sm_set_pindirs_with_mask(pio, sm, pindirs, pinmask); 
