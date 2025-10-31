@@ -45,7 +45,7 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	pio_sm_config c = data_wr_program_get_default_config(offset);
 
 	// join fifo's for one large fifo since sm is tx only
-	//sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
 	// enable fifo autopull and set threashold (32)
 	sm_config_set_out_shift(&c, true, true, 32);
@@ -71,7 +71,7 @@ static inline void data_wr_program_init(PIO pio, uint sm, uint offset, float fdi
 	pindirs |= DATA_MASK << DATA_BASE_PIN;
 	pinmask |= DATA_MASK << DATA_BASE_PIN;
 
-	for(uint i=CTRL_DATA_BASE_PIN; i < CTRL_DATA_BASE_PIN + CTRL_DATA_W; i++){ // ctrl data
+	for(i=CTRL_DATA_BASE_PIN; i < CTRL_DATA_BASE_PIN + CTRL_DATA_W; i++){ // ctrl data
 		pio_gpio_init(pio, i);
 	}
 	pinmask |= CTRL_DATA_MASK << CTRL_DATA_BASE_PIN;
