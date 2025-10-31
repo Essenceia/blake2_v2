@@ -129,7 +129,7 @@ int main() {
 	
 		/* config */
 		//send_config(0xde, 0xad, 0xbeefdeaddeadbeef, wr_dma_chan, p, pl);	
-		send_config(0xff, 0x00, 0x0, wr_dma_chan, p, pl);	
+		send_config(0xff, 0x13, 0x0, wr_dma_chan, p, pl);	
 
 		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
