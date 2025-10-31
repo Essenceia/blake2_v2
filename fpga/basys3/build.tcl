@@ -25,7 +25,7 @@ route_design
 phys_opt_design
 report_timing_summary -no_detailed_paths
 
-if $enable_debug_core {
+if { $enable_debug_core } {
 	write_debug_probes -force $debug_probes_path
 	report_debug_core
 }
