@@ -31,7 +31,7 @@ data_wr:
 	set pins, 0 [1]
 .wrap_target
 data_start:
-	wait 1 gpio CTRL_READY_PIN
+	wait 1 gpio CTRL_READY_PIN [1]
 	;wait 0 gpio BUS_CLK_PIN; 
 	pull noblock
 	jmp offset+data_wr

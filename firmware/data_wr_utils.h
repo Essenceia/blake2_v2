@@ -7,8 +7,8 @@
 #include "pinout.h"
 
 typedef struct __attribute__((packed)) {
-	uint8_t nn;
 	uint8_t kk;
+	uint8_t nn;
 	uint64_t ll;
 } config_t;
 
@@ -19,7 +19,7 @@ typedef struct {
 	} data;
 } data_block_t;
 
-void send_config(uint8_t nn, uint8_t kk, uint64_t ll, uint dma_chan, pinout_t *p, size_t pl);
+void send_config(uint8_t kk, uint8_t nn, uint64_t ll, uint dma_chan, pinout_t *p, size_t pl);
 
 // conversion functions
 void config_to_pinout(config_t *c, pinout_t *p, size_t pl);

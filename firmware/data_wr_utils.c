@@ -19,11 +19,11 @@ void config_to_pinout(config_t *c, pinout_t *p, size_t pl)
 	}
 }
 
-void send_config(uint8_t nn, uint8_t kk, uint64_t ll, uint dma_chan, pinout_t *p, size_t pl)
+void send_config(uint8_t kk, uint8_t nn, uint64_t ll, uint dma_chan, pinout_t *p, size_t pl)
 {
 	config_t c; 
-	c.nn = nn; 
 	c.kk = kk; 
+	c.nn = nn; 
 	c.ll = ll; 
 	config_to_pinout(&c, p, pl);
 	start_wr_dma_pinout_stream(p, pl ,dma_chan);	
