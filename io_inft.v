@@ -38,7 +38,11 @@ module byte_size_config(
 	end
 
 	always @(posedge clk) begin
-		if (config_v) begin
+		if (~nreset) begin
+			kk_q <= 6'b0;
+			nn_q <= 6'b0;
+			ll_q <= 64'b0;
+		end else if (config_v) begin
 			case(cfg_cnt_q) 
 				CFG_CNT_KK: kk_q <= data_i[5:0];
 				CFG_CNT_NN: nn_q <= data_i[5:0];
