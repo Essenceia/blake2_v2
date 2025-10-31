@@ -28,6 +28,48 @@ void send_config(uint8_t kk, uint8_t nn, uint64_t ll, uint dma_chan, pinout_t *p
 	config_to_pinout(&c, p, pl);
 	start_wr_dma_pinout_stream(p, pl ,dma_chan);	
 }
+
+// break data into blocks
+void data_to_blocs(uint8_t *d, size_t dl, data_blocs_t* b, size_t bl){
+	hard_assert((dl+7)/8 <= bl);
+	memset(b, 0, bl*sizeof(data_blocs_t));
+	memcpy(b, d, dl);
+}
+// blocs to pinout 
+void blocs_to_pinout(data_blocs_t *b, size_t bl, pinout_t *p, size_t pl){
+	bool first = true; 
+	bool last; 
+	hard_assert(bl*sizeof(data_blocs_t) <= pl);
+	for(uint i = 0; i < bl; i++){
+		for(uint j=0; j < sizeof(data_blocs_t); j++)
+		{
+			size_t x = i*sizeof(data_blocs_t)+j;
+			last = (i == bl-1) && (j == 7);
+			p[x].valid_i = 1;
+			p[x].data_i = b[i].data.chunck[j];
+			p[x].data_cmd_i = first ? CTRL_DATA_CMD_START : 
+				last ? CTRL_DATA_CMD_LAST : CTRL_DATA_CMD_DATA; 
+			first = false; 
+		}
+	}
+}
+
+void send_data(uint8_t *data, size_t dl, uint dma_chan, pinout_t *p, size_t pl)
+{
+	data_blocs_t *blocs;
+	size_t bl = (dl+pl-1) / pl; // ceil division, size_t is an unsigned and the c division convention is to round down
+
+	data_to_blocs(data, dl, blocs, bl);
+
+	hard_assert(dl <= pl);
+	 
+	
+	
+	// free
+	free(blocs);
+}
+
+
 /* setup dma channel for writing 32b bursts to the PIO TX FIFO 
  * ! not configuring : 
  * - read address 
