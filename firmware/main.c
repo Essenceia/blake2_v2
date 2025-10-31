@@ -10,6 +10,7 @@
 
 #include "loopback.pio.h"
 #include "bus_clk.pio.h"
+#include "sync_sm.pio.h"
 #include "data_wr.pio.h"
 #include "data_wr_utils.h" 
 #include "pio_utils.h" 
@@ -20,10 +21,11 @@
 
 #define DELAY_MS 1000
 
-#define PIO_N 3 // number of PIO SM used
-#define PIO_LED 0
-#define PIO_CLK 1
-#define PIO_WR  2
+#define PIO_N    4 // number of PIO SM used
+#define PIO_LED  0
+#define PIO_CLK  1
+#define PIO_WR   2
+#define PIO_SYNC 3
 #define macro_str(x) #x
 
 #define PICO_SYS_CLK_HW              200000000   // 200 MHz
@@ -61,9 +63,6 @@ int main() {
 	stdio_init_all();
 	
 
-
-
-
 	/* data wr */ 
 	s &= pio_claim_free_sm_and_add_program(&data_wr_program, &pio[PIO_WR], &sm[PIO_WR], &offset[PIO_WR]);
 	log_init(PIO_WR);
@@ -78,10 +77,16 @@ int main() {
 		BUS_CLK_PIN, 1, true);
 	log_init(PIO_CLK);
 	hard_assert(s);
-	//clk_div = (float)clock_get_hz(clk_sys) / (BUS_PIO_CLK_FREQ_HZ); 
+	clk_div = (float)clock_get_hz(clk_sys) / (BUS_PIO_CLK_FREQ_HZ); 
 	bus_clk_program_init(pio[PIO_CLK], sm[PIO_CLK], offset[PIO_CLK], BUS_CLK_PIN, clk_div);
 	gpio_set_drive_strength(BUS_CLK_PIN, GPIO_DRIVE_STRENGTH_12MA);
 	gpio_set_slew_rate(BUS_CLK_PIN, GPIO_SLEW_RATE_FAST);
+
+	/* sync program */
+	s &= pio_claim_free_sm_and_add_program(&sync_sm_program, &pio[PIO_SYNC], &sm[PIO_SYNC], &offset[PIO_SYNC]);
+	log_init(PIO_SYNC);
+	hard_assert(s);
+	sync_sm_program_init(pio[PIO_SYNC], sm[PIO_SYNC], offset[PIO_SYNC], clk_div);
 
 	/* led */
 	s = allocate_prog_pio(0, &pio[PIO_LED], &sm[PIO_LED], &offset[PIO_LED], &loopback_program);
@@ -92,7 +97,8 @@ int main() {
 	
 /* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
-	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR] | 1u << sm[PIO_LED];;
+	hard_assert(pio[PIO_CLK] == pio[PIO_SYNC]);
+	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR] | 1u << sm[PIO_SYNC];;
 	//pio_restart_sm_mask(pio[PIO_CLK], sm_mask);
 	pio_enable_sm_mask_in_sync(pio[PIO_CLK], sm_mask);
 
@@ -122,7 +128,8 @@ int main() {
 		//gpio19 = gpio_get(19);
 	
 		/* config */
-		send_config(0x00, 0xff, 0x0, wr_dma_chan, p, pl);	
+		//send_config(0xde, 0xad, 0xbeefdeaddeadbeef, wr_dma_chan, p, pl);	
+		send_config(0xff, 0x00, 0x0, wr_dma_chan, p, pl);	
 
 		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);

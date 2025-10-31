@@ -23,17 +23,17 @@
 ; if no data is available write then content of X scratch
 data_init:
 	set pins, 0
-	set x, 31 [1]
+	set x, 0
 	jmp offset+data_start
 data_wr:
 	out pins, 32
 	jmp !OSRE offset+data_wr
-	set pins, 0 [1]
+	set pins, 0
 .wrap_target
 data_start:
-	wait 1 gpio CTRL_READY_PIN [1]
-	;wait 0 gpio BUS_CLK_PIN; 
-	pull noblock
+	wait 1 gpio CTRL_READY_PIN
+	irq wait 4 
+	pull noblock 
 	jmp offset+data_wr
 .wrap
 
