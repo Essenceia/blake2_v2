@@ -106,8 +106,8 @@ int main() {
 	
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
 	hard_assert(pio[PIO_CLK] == pio[PIO_SYNC]);
-	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR] | 1u << sm[PIO_SYNC];;
-	//pio_restart_sm_mask(pio[PIO_CLK], sm_mask);
+	hard_assert(pio[PIO_WR] == pio[PIO_RD]);
+	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR] | 1u << sm[PIO_SYNC] | 1u << sm[PIO_RD];
 	pio_enable_sm_mask_in_sync(pio[PIO_CLK], sm_mask);
 
 	/* data wr */ 
