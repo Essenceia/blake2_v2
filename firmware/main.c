@@ -46,7 +46,8 @@ int main() {
 	uint led = 1;
 	pinout_t *p;
 	bool s = true;
-	size_t pl = CONFIG_W;
+	uint8_t random_data[BLOCK_W];
+	size_t pl = CONFIG_W + BLOCK_W;
 
 	/* debug hw */
 	dma_debug_hw_t *debug_dma;
@@ -128,9 +129,8 @@ int main() {
 		//gpio19 = gpio_get(19);
 	
 		/* config */
-		//send_config(0xde, 0xad, 0xbeefdeaddeadbeef, wr_dma_chan, p, pl);	
-		send_config(0xff, 0x13, 0x0, wr_dma_chan, p, pl);	
-
+		send_config(0xff, 0x13, 0x0, wr_dma_chan, p, pl);
+		send_data(random_data, BLOCK_W, p, pl, wr_dma_chan, pio[PIO_WR], sm[PIO_WR]);
 		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;

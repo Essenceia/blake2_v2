@@ -31,7 +31,7 @@ void send_config(uint8_t kk, uint8_t nn, uint64_t ll, uint dma_chan, pinout_t *p
 
 // break data into blocks
 void data_to_blocs(uint8_t *d, size_t dl, data_blocs_t* b, size_t bl){
-	hard_assert((dl+7)/8 <= bl);
+	hard_assert(dl <= bl*BLOCK_W);
 	memset(b, 0, bl*BLOCK_W);
 	memcpy(b, d, dl);
 }
@@ -60,8 +60,9 @@ void blocs_to_pinout(data_blocs_t *b, size_t bl, pinout_t *p, size_t pl){
 
 void send_data(uint8_t *data, size_t dl, pinout_t *p, size_t pl, uint dma_chan, PIO pio, uint sm)
 {
-	data_blocs_t *blocs;
 	size_t bl = (dl+pl-1) / pl; // ceil division, size_t is an unsigned and the c division convention is to round down
+	data_blocs_t *blocs = (data_blocs_t*)malloc(bl);
+	hard_assert(blocs);
 
 	data_to_blocs(data, dl, blocs, bl);
 
