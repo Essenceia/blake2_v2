@@ -16,8 +16,8 @@ module byte_size_config(
 	localparam CFG_CNT_NN      = 4'd1;
 	/* verilator lint_off UNUSEDPARAM */
 	localparam CFG_CNT_LL_MIN  = 4'd2;
-	localparam CFG_CNT_LL_MAX  = 4'd10;
 	/* verilator lint_on UNUSEDPARAM */
+	localparam CFG_CNT_LL_MAX  = 4'd9;
 
 	reg       unused_cfg_cnt_q;
 	(* MARK_DEBUG = "true" *) reg [3:0]  cfg_cnt_q; 
@@ -30,7 +30,7 @@ module byte_size_config(
 	assign config_n_v = valid_i & ~(cmd_i == CMD_CONF);
 
 	always @(posedge clk) begin
-		if ((~nreset) | config_n_v) begin
+		if ((~nreset) | config_n_v | (cfg_cnt_q == CFG_CNT_LL_MAX)) begin
 			cfg_cnt_q <= 'd0;
 		end else begin
 			{ unused_cfg_cnt_q, cfg_cnt_q } <= cfg_cnt_q + {3'b0, config_v};
