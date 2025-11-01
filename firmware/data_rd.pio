@@ -5,14 +5,15 @@
 init:
 	jmp loop
 data_rd:
+.wrap_target
 	in pins, 8
-	jmp data_rd
+	jmp pin data_rd
+.wrap
 	push
 loop:
-.wrap_target
 	irq wait 4
-	jmp pin data_rd	
-.wrap
+	jmp pin data_rd
+	jmp loop
 
 % c-sdk {
 static inline void data_rd_program_init(PIO pio, uint sm , uint offset, float fdiv){
@@ -42,8 +43,8 @@ static inline void data_rd_program_init(PIO pio, uint sm , uint offset, float fd
 	}
 	pinmask |= DATA_MASK << HASH_BASE_PIN;
 
-	pio_gpio_init(pio, CTRL_VALID_PIN);
-	pinmask |= (uint32_t)0x1 << CTRL_VALID_PIN;
+	pio_gpio_init(pio, CTRL_HASH_VALID_PIN);
+	pinmask |= (uint32_t)0x1 << CTRL_HASH_VALID_PIN;
 	
 	pio_sm_set_pindirs_with_mask(pio, sm, pinmask, pinmask);
 
