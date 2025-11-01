@@ -48,7 +48,7 @@ void blocs_to_pinout(data_blocs_t *b, size_t bl, pinout_t *p, size_t pl){
 		for(uint j=0; j < BLOCK_W; j++)
 		{
 			size_t x = i*BLOCK_W+j;
-			last = (i == bl-1) && (j == 7);
+			last = (i == bl-1) && (j == BLOCK_W-1);
 			p[x].valid_i = 1;
 			p[x].data_i = b[i].data[j];
 			p[x].data_cmd_i = first ? CTRL_DATA_CMD_START : 
@@ -67,10 +67,13 @@ void send_data(uint8_t *data, size_t dl, pinout_t *p, size_t pl, uint dma_chan, 
 	data_to_blocs(data, dl, blocs, bl);
 
 	hard_assert(dl <= pl);
-	 
+
+	blocs_to_pinout(blocs, bl, p, pl); 
+
 	// stream by block, since we must examine the ready signal between
 	// each transfer
 	// to guaranty the pio pull is empty 
+	dma_channel_wait_for_finish_blocking(dma_chan); // wait for dma channel to be empty, else will overwrite
 	for(uint b=0; b < bl; b++){
 		start_wr_dma_pinout_stream(&p[b*BLOCK_W], BLOCK_W, dma_chan);
 		dma_channel_wait_for_finish_blocking(dma_chan);
