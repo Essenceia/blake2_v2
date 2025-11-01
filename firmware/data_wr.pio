@@ -11,16 +11,19 @@
 ; expected to be running at 2xBUS_CLK freq
 
 ; will use auto pulling from the tx fifo to write to the gpio
-; if the fifo is empty pull should block
-; -> when blocked the content of the X scratch should be written
-;    this will deactivate the valid bit on the data transfer line
+; if the fifo is empty OSR will be empty 
+; although not documented, reading an empty OSR will read the X
+; scratchpad, as such, we set the content of the scratchpad to 0
 
-; write X scratch register content, will be read to the OSR during blocking
-; -> set to all 0s 
+; the wait is on the ready signal signifying the asic can accept
+; a new data transaction
 
-; wait for ready 
-; then read config and data from the fifo ( streamed from dma )
-; if no data is available write then content of X scratch
+; irq 4 is a PIO only IRQ used to corrdinate the clk state between SM
+; irq 3 is visible to the CPU and is used to wake up the core from a 
+; low power mode when it is streaming data blocks. 
+; We do this since the data streaming doesn't re-evaluate the state of
+; the ready pin when data is being streamed out from the fifo. 
+
 data_init:
 	set pins, 0
 	set x, 0
@@ -31,6 +34,7 @@ data_wr:
 	set pins, 0
 .wrap_target
 data_start:
+	;irq set 3
 	wait 1 gpio CTRL_READY_PIN
 	irq wait 4 
 	pull noblock 

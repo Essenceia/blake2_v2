@@ -32,21 +32,25 @@ void send_config(uint8_t kk, uint8_t nn, uint64_t ll, uint dma_chan, pinout_t *p
 // break data into blocks
 void data_to_blocs(uint8_t *d, size_t dl, data_blocs_t* b, size_t bl){
 	hard_assert((dl+7)/8 <= bl);
-	memset(b, 0, bl*sizeof(data_blocs_t));
+	memset(b, 0, bl*BLOCK_W);
 	memcpy(b, d, dl);
 }
 // blocs to pinout 
+// the start data ctrl mode must be used for at least one transfer system 
+// of the first block
+// similarly the last must be asserted for at least one cycle of the last
+// block
 void blocs_to_pinout(data_blocs_t *b, size_t bl, pinout_t *p, size_t pl){
 	bool first = true; 
 	bool last; 
-	hard_assert(bl*sizeof(data_blocs_t) <= pl);
+	hard_assert(bl*BLOCK_W <= pl);
 	for(uint i = 0; i < bl; i++){
-		for(uint j=0; j < sizeof(data_blocs_t); j++)
+		for(uint j=0; j < BLOCK_W; j++)
 		{
-			size_t x = i*sizeof(data_blocs_t)+j;
+			size_t x = i*BLOCK_W+j;
 			last = (i == bl-1) && (j == 7);
 			p[x].valid_i = 1;
-			p[x].data_i = b[i].data.chunck[j];
+			p[x].data_i = b[i].data[j];
 			p[x].data_cmd_i = first ? CTRL_DATA_CMD_START : 
 				last ? CTRL_DATA_CMD_LAST : CTRL_DATA_CMD_DATA; 
 			first = false; 
@@ -54,7 +58,7 @@ void blocs_to_pinout(data_blocs_t *b, size_t bl, pinout_t *p, size_t pl){
 	}
 }
 
-void send_data(uint8_t *data, size_t dl, uint dma_chan, pinout_t *p, size_t pl)
+void send_data(uint8_t *data, size_t dl, pinout_t *p, size_t pl, uint dma_chan, PIO pio, uint sm)
 {
 	data_blocs_t *blocs;
 	size_t bl = (dl+pl-1) / pl; // ceil division, size_t is an unsigned and the c division convention is to round down
@@ -63,8 +67,14 @@ void send_data(uint8_t *data, size_t dl, uint dma_chan, pinout_t *p, size_t pl)
 
 	hard_assert(dl <= pl);
 	 
-	
-	
+	// stream by block, since we must examine the ready signal between
+	// each transfer
+	// to guaranty the pio pull is empty 
+	for(uint b=0; b < bl; b++){
+		start_wr_dma_pinout_stream(&p[b*BLOCK_W], BLOCK_W, dma_chan);
+		dma_channel_wait_for_finish_blocking(dma_chan);
+		while(pio_sm_get_tx_fifo_level(pio, sm)!=0){}
+	} 
 	// free
 	free(blocs);
 }

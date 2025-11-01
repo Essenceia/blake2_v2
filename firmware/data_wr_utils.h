@@ -6,6 +6,7 @@
 #include "pinout.h"
 
 #define CONFIG_W 10
+#define BLOCK_W 64
 
 typedef struct __attribute__((packed)) {
 	uint8_t kk;
@@ -13,16 +14,13 @@ typedef struct __attribute__((packed)) {
 	uint64_t ll;
 } config_t;
 
-typedef struct {
-	union {
-		uint64_t block;
-		uint8_t  chunck[8];
-	} data;
+typedef struct __attribute__((packed)) {
+	uint8_t data[BLOCK_W];
 } data_blocs_t;
 
 void send_config(uint8_t kk, uint8_t nn, uint64_t ll, uint dma_chan, pinout_t *p, size_t pl);
 
-void send_data(uint8_t *data, size_t dl, uint dma_chan, pinout_t *p, size_t pl);
+void send_data(uint8_t *data, size_t dl, pinout_t *p, size_t pl, uint dma_chan, PIO pio, uint sm);
 
 // conversion functions
 void config_to_pinout(config_t *c, pinout_t *p, size_t pl);
