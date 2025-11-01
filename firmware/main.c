@@ -125,17 +125,13 @@ int main() {
 	uint64_t it_cnt = 0;
 	pio_hw_t *debug_pio;
 	debug_pio = PIO_INSTANCE(1);
-	//uint8_t gpio19;
 
     while (true) {
-		sleep_ms(DELAY_MS);
-		
 		/* debug */
 		tx_fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]); 
 		rx_fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_RD], sm[PIO_RD]); 
 		stalled = pio_sm_is_exec_stalled(pio[PIO_WR], sm[PIO_WR]);
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
-		//gpio19 = gpio_get(19);
 	
 		/* config */
 		send_config(0xff, 0x13, it_cnt++, wr_dma_chan, p, pl);
