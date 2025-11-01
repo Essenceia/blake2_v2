@@ -129,7 +129,7 @@ int main() {
     while (true) {
 		/* debug */
 		tx_fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]); 
-		rx_fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_RD], sm[PIO_RD]); 
+		rx_fifo_lvl = pio_sm_get_rx_fifo_level(pio[PIO_RD], sm[PIO_RD]); 
 		stalled = pio_sm_is_exec_stalled(pio[PIO_WR], sm[PIO_WR]);
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
 	
