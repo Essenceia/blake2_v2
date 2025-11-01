@@ -15,7 +15,7 @@ loop:
 .wrap
 
 % c-sdk {
-static inline data_rd_program_init(PIO pio, uint sm , uint offset, uint pin, float fdiv){
+static inline void data_rd_program_init(PIO pio, uint sm , uint offset, float fdiv){
 	uint i;
 	uint32_t pindirs = 0;
 	uint32_t pinmask = 0;
@@ -38,7 +38,7 @@ static inline data_rd_program_init(PIO pio, uint sm , uint offset, uint pin, flo
 
 	// init gpio
 	for(uint i=HASH_BASE_PIN; i < HASH_BASE_PIN + DATA_W; i++){
-		pio_gpio_init(pin, i);
+		pio_gpio_init(pio, i);
 	}
 	pinmask |= DATA_MASK << HASH_BASE_PIN;
 

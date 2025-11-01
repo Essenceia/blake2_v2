@@ -11,6 +11,7 @@
 #include "loopback.pio.h"
 #include "bus_clk.pio.h"
 #include "sync_sm.pio.h"
+#include "data_rd.pio.h"
 #include "data_wr.pio.h"
 #include "data_wr_utils.h" 
 #include "pio_utils.h" 
@@ -21,11 +22,12 @@
 
 #define DELAY_MS 1000
 
-#define PIO_N    4 // number of PIO SM used
+#define PIO_N    5 // number of PIO SM used
 #define PIO_LED  0
 #define PIO_CLK  1
 #define PIO_WR   2
-#define PIO_SYNC 3
+#define PIO_RD   3
+#define PIO_SYNC 4
 #define macro_str(x) #x
 
 #define PICO_SYS_CLK_HW              200000000   // 200 MHz
@@ -71,6 +73,12 @@ int main() {
 	clk_div = (float)clock_get_hz(clk_sys) / (DATA_PIO_CLK_FREQ_HZ); 
 	data_wr_program_init(pio[PIO_WR], sm[PIO_WR], offset[PIO_WR], clk_div);
 
+	/* data rd */ 
+	s &= pio_claim_free_sm_and_add_program(&data_rd_program, &pio[PIO_RD], &sm[PIO_RD], &offset[PIO_RD]);
+	log_init(PIO_RD);
+	hard_assert(s);
+	data_rd_program_init(pio[PIO_RD], sm[PIO_RD], offset[PIO_RD], clk_div);
+
 	/* bus clk */
 	s &= pio_claim_free_sm_and_add_program_for_gpio_range(
 		&bus_clk_program, 
@@ -89,14 +97,13 @@ int main() {
 	hard_assert(s);
 	sync_sm_program_init(pio[PIO_SYNC], sm[PIO_SYNC], offset[PIO_SYNC], clk_div);
 
-	/* led */
+	/* led - explicitlt place on PIO0 to prevent overwritting of GPIO25 by `pull noblock` on data_wr*/
 	s = allocate_prog_pio(0, &pio[PIO_LED], &sm[PIO_LED], &offset[PIO_LED], &loopback_program);
 	log_init(PIO_LED);
 	hard_assert(s);
 	//clk_div = (float)clock_get_hz(clk_sys) / (LED_PIO_CLK_FREQ_HZ); 
 	loopback_program_init(pio[PIO_LED], sm[PIO_LED], offset[PIO_LED], PICO_DEFAULT_LED_PIN, clk_div);	
 	
-/* start PIOs: let clock pio start a bit earlier since it is used to clk hw and we need to aquire a lock */
 	hard_assert(pio[PIO_CLK] == pio[PIO_WR]);
 	hard_assert(pio[PIO_CLK] == pio[PIO_SYNC]);
 	uint32_t sm_mask = 1u << sm[PIO_CLK] | 1u << sm[PIO_WR] | 1u << sm[PIO_SYNC];;
@@ -112,9 +119,10 @@ int main() {
 	//gpio_set_dir(19, GPIO_IN);
 
 	uint32_t *tc = (uint32_t*)TRANSFER_COUNT_ADDR; 
-	uint fifo_lvl;
+	uint tx_fifo_lvl, rx_fifo_lvl;
 	bool stalled;
 	uint8_t pio_pc;
+	uint64_t it_cnt = 0;
 	pio_hw_t *debug_pio;
 	debug_pio = PIO_INSTANCE(1);
 	//uint8_t gpio19;
@@ -123,22 +131,26 @@ int main() {
 		sleep_ms(DELAY_MS);
 		
 		/* debug */
-		fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]); 
+		tx_fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]); 
+		rx_fifo_lvl = pio_sm_get_tx_fifo_level(pio[PIO_RD], sm[PIO_RD]); 
 		stalled = pio_sm_is_exec_stalled(pio[PIO_WR], sm[PIO_WR]);
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
 		//gpio19 = gpio_get(19);
 	
 		/* config */
-		send_config(0xff, 0x13, 0x0, wr_dma_chan, p, pl);
+		send_config(0xff, 0x13, it_cnt++, wr_dma_chan, p, pl);
 		send_data(random_data, BLOCK_W, p, pl, wr_dma_chan, pio[PIO_WR], sm[PIO_WR]);
 		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;
+#ifdef DEBUG_LOG
 		printf("DMA channel busy %d wr PIO TX FIFO lvl %d trans count %d\n",
 			dma_channel_is_busy(wr_dma_chan),
 			pio_sm_get_tx_fifo_level(pio[PIO_WR], sm[PIO_WR]), 
 			*tc);
 		printf("PIO0 ctrl 0x%08x\n", debug_pio->ctrl);
 		sleep_ms(DELAY_MS);
+#endif
+		
     }
 }
