@@ -78,7 +78,7 @@ module block_data(
 
 	reg       data_v_q;
 	reg [7:0] data_q;
-	reg [5:0] data_cnt_q;
+	(* MARK_DEBUG = "true" *) reg [5:0] data_cnt_q;
 	reg [5:0] data_idx_q;
 	reg       unused_data_cnt_q;
 	wire      conf_v;

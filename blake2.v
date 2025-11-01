@@ -41,8 +41,8 @@ module blake2 #(
 	localparam RND_W    = $clog2(R);
 	localparam G_RND_W  = $clog2(8);
 
-	reg  [G_RND_W-1:0] g_idx_q; // G function idx, sub-round
-	reg  [RND_W-1:0] round_q;
+	(* MARK_DEBUG = "true" *)reg  [G_RND_W-1:0] g_idx_q; // G function idx, sub-round
+	(* MARK_DEBUG = "true" *)reg  [RND_W-1:0] round_q;
 
 	wire [BB-1:0]  t;	
 	reg  [IB_CNT_W-1:0]  block_idx_plus_one_q;
@@ -114,7 +114,7 @@ module blake2 #(
 
 	reg first_block_q; 
 	reg last_block_q; 
-	reg [2:0] fsm_q;
+	(* MARK_DEBUG = "true" *) reg [2:0] fsm_q;
 	wire f_finished;
 	reg [W_CLOG2_P1-1:0] res_cnt_q;
 	wire [W_CLOG2_P1-1:0] res_cnt_add;
