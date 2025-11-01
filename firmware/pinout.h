@@ -36,7 +36,7 @@ _Static_assert(sizeof(pinout_t) == (32/8));
 #define CTRL_MODE1_PIN CTRL_DATA_BASE_PIN+2
 
 #define CTRL_READY_PIN      (CTRL_BASE_PIN+3)
-#define CTRL_HASH_VALID_PIN (CTRL_BASE_PIN+7)
+#define CTRL_HASH_VALID_PIN 26
 
 #define CTRL_DATA_CMD_CTRL  0x0
 #define CTRL_DATA_CMD_START 0x1
