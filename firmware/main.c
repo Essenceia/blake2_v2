@@ -40,6 +40,8 @@
 #define TC_OFF   (uint32_t) 0x008
 #define TRANSFER_COUNT_ADDR (_DMA_BASE + TC_OFF)
 
+#define MAX_NN 32
+
 #define log_init(PIO_IDX) printf(#PIO_IDX " init sucess %d:{%d:%d}", s, sm[PIO_IDX], offset[PIO_IDX]);
 int main() {
 	PIO pio[PIO_N];
@@ -51,6 +53,7 @@ int main() {
 	bool s = true;
 	uint8_t random_data[BLOCK_W];
 	size_t pl = CONFIG_W + BLOCK_W;
+	uint8_t hash_buffer[MAX_NN];
 
 	/* debug hw */
 	dma_debug_hw_t *debug_dma;
@@ -113,11 +116,8 @@ int main() {
 
 	/* data wr */ 
 	uint wr_dma_chan = init_wr_dma_channel(pio[PIO_WR], sm[PIO_WR]);
-
-
-	/* debug gpio read 19 */ 
-	//gpio_init(19);
-	//gpio_set_dir(19, GPIO_IN);
+	/* data rd */
+	uint rd_dma_chan = init_rd_dma_channel(pio[PIO_RD], sm[PIO_RD]);
 
 	uint32_t *tc = (uint32_t*)TRANSFER_COUNT_ADDR; 
 	uint tx_fifo_lvl, rx_fifo_lvl;
@@ -126,6 +126,8 @@ int main() {
 	uint64_t it_cnt = 0;
 	pio_hw_t *debug_pio;
 	debug_pio = PIO_INSTANCE(1);
+	const uint nn = MAX_NN;
+	uint8_t hash[MAX_NN];
 
     while (true) {
 		/* debug */
@@ -135,8 +137,16 @@ int main() {
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
 	
 		/* config */
-		send_config(0xff, 0x13, it_cnt++, wr_dma_chan, p, pl);
+		send_config(0xff, nn, it_cnt++, wr_dma_chan, p, pl);
+
+		/* setup dma hash read stream */
+		setup_rd_dma_hash_stream(rd_dma_chan, nn, hash_buffer, MAX_NN);
+
+		/* send data */
 		send_data(random_data, BLOCK_W, p, pl, wr_dma_chan, pio[PIO_WR], sm[PIO_WR]);
+
+		/* get hash from memory, writen over dma */
+		read_hash(hash, nn, hash_buffer, MAX_NN, rd_dma_chan);
 		
 		pio_sm_put_blocking(pio[PIO_LED], sm[PIO_LED], led);
 		led = led ? 0:1;

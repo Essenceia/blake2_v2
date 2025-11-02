@@ -19,6 +19,7 @@ uint init_rd_dma_channel(PIO pio, uint sm){
 void setup_rd_dma_hash_stream(uint dma_chan, uint nn, uint8_t* buffer, size_t bl){
 	size_t tc = (nn + PIO_FIFO_W-1)/ PIO_FIFO_W;	
 	hard_assert(tc <= bl*PIO_FIFO_W);
+	hard_assert(!dma_channel_is_busy(dma_chan));
 	dma_channel_set_write_addr(dma_chan, buffer, false);
 	dma_channel_set_transfer_count(dma_chan, tc, true);
 }
@@ -26,7 +27,6 @@ void setup_rd_dma_hash_stream(uint dma_chan, uint nn, uint8_t* buffer, size_t bl
 void read_hash(uint8_t* hash, uint8_t nn, uint8_t *buffer, size_t bl, uint dma_chan){
 	dma_channel_wait_for_finish_blocking(dma_chan);
 	hard_assert(nn <= bl);
-
 	memcpy(buffer, hash, nn);
 }
 
