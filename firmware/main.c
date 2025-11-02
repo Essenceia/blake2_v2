@@ -14,6 +14,7 @@
 #include "data_rd.pio.h"
 #include "data_wr.pio.h"
 #include "data_wr_utils.h" 
+#include "data_rd_utils.h" 
 #include "pio_utils.h" 
 
 #include "hardware/structs/dma_debug.h"
