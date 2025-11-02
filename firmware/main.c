@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "pinout.h" 
 #include "pinout_pio_match.h" 
 
@@ -63,6 +64,11 @@ int main() {
 
 
 	p = malloc(pl * sizeof(pinout_t));
+
+	memset(random_data,0, BLOCK_W);
+	random_data[0] = 'a';
+	random_data[1] = 'b';
+	random_data[2] = 'c';
 
 	// set system clk
 	set_sys_clock_hz(PICO_SYS_CLK_HW, true);
@@ -137,7 +143,7 @@ int main() {
 		pio_pc = pio_sm_get_pc(pio[PIO_WR], sm[PIO_WR]);
 	
 		/* config */
-		send_config(0xff, nn, it_cnt++, wr_dma_chan, p, pl);
+		send_config(0, nn, 3, wr_dma_chan, p, pl);
 
 		/* setup dma hash read stream */
 		setup_rd_dma_hash_stream(rd_dma_chan, nn, hash_buffer, MAX_NN);
